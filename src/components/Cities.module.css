@@ -1,0 +1,126 @@
+.section {
+  background: var(--cream);
+}
+
+.header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: end;
+  margin-bottom: 56px;
+}
+
+.sub {
+  font-size: 16px;
+  color: var(--muted);
+  line-height: 1.7;
+  font-weight: 300;
+  padding-bottom: 4px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+}
+
+.card {
+  position: relative;
+  height: 260px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.card:first-child {
+  border-radius: 4px 0 0 0;
+}
+.card:nth-child(3) {
+  border-radius: 0 4px 0 0;
+}
+.card:nth-child(4) {
+  border-radius: 0 0 0 4px;
+}
+.card:last-child {
+  border-radius: 0 0 4px 0;
+}
+
+.cardBg {
+  position: absolute;
+  inset: 0;
+  background-color: var(--city-color);
+  background-image: linear-gradient(
+    to bottom right,
+    color-mix(in srgb, var(--city-color) 80%, #000 20%),
+    var(--city-color),
+    color-mix(in srgb, var(--city-color) 70%, #fff 30%)
+  );
+  transition: transform 0.5s ease;
+}
+
+.card:hover .cardBg {
+  transform: scale(1.04);
+}
+
+.cardBody {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.12) 0%,
+    rgba(0,0,0,0.0) 40%,
+    rgba(0,0,0,0.35) 100%
+  );
+}
+
+.cityName {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.country {
+  font-size: 11px;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.tag {
+  font-size: 13px;
+  color: rgba(255,255,255,0.85);
+  font-weight: 300;
+  font-style: italic;
+}
+
+.more {
+  text-align: center;
+  margin-top: 32px;
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 768px) {
+  .header {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .card:first-child { border-radius: 4px 0 0 0; }
+  .card:nth-child(3) { border-radius: 0; }
+  .card:nth-child(2) { border-radius: 0 4px 0 0; }
+  .card:nth-child(5) { border-radius: 0 0 0 4px; }
+  .card:last-child { border-radius: 0 0 4px 0; }
+}
