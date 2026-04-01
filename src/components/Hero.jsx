@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import styles from './Hero.module.css'
 
-const cities = ['Prague', 'Lisbon', 'Sofia', 'Tallinn', 'Kraków', 'Tbilisi']
+const cities = ['Prague', 'Rome']
 
 export default function Hero() {
   const [cityIndex, setCityIndex] = useState(0)
@@ -25,12 +26,15 @@ export default function Hero() {
   return (
     <section className={styles.hero}>
       <nav className={styles.nav}>
-        <span className={styles.logo}>friends<em>around</em></span>
-        <button className="primary" onClick={scrollToSignup}>Get early access</button>
+        <Link to="/" className={styles.logo}>drifter<em>trip</em></Link>
+        <div className={styles.navLinks}>
+          <Link to="/about" className={styles.navLink}>About us</Link>
+          <button className="primary" onClick={scrollToSignup}>Get early access</button>
+        </div>
       </nav>
 
       <div className={styles.content}>
-        <p className="section-label">Europe, the real way</p>
+        <p className="section-label">Experience it like a local</p>
 
         <h1 className={styles.headline}>
           A local friend<br />
@@ -52,7 +56,7 @@ export default function Hero() {
 
         <div className={styles.stats}>
           <div className={styles.stat}>
-            <span className={styles.statNum}>12</span>
+            <span className={styles.statNum}>2</span>
             <span className={styles.statLabel}>Cities</span>
           </div>
           <div className={styles.divider} />
@@ -73,10 +77,7 @@ export default function Hero() {
           <div className={styles.tag}>Prague, CZ</div>
         </div>
         <div className={`${styles.imgBox} ${styles.img2}`}>
-          <div className={styles.tag}>Sofia, BG</div>
-        </div>
-        <div className={`${styles.imgBox} ${styles.img3}`}>
-          <div className={styles.tag}>Lisbon, PT</div>
+          <div className={styles.tag}>Rome, IT</div>
         </div>
       </div>
     </section>

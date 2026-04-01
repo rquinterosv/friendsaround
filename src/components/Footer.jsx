@@ -1,12 +1,16 @@
+import { Link } from 'react-router-dom'
 import styles from './Footer.module.css'
 
 export default function Footer() {
   return (
     <footer className={styles.footer}>
       <div className={styles.inner}>
-        <span className={styles.logo}>friends<em>around</em></span>
+        <Link to="/" className={styles.logo}>drifter<em>trip</em></Link>
+        <nav className={styles.links}>
+          <Link to="/about" className={styles.link}>About us</Link>
+        </nav>
         <p className={styles.tagline}>Europe, as locals live it.</p>
-        <p className={styles.copy}>© 2025 FriendsAround. Built with ♥ in Prague.</p>
+        <p className={styles.copy}>© 2025 DrifterTrip. Built with ♥ in Prague.</p>
       </div>
     </footer>
   )

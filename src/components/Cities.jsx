@@ -2,11 +2,7 @@ import styles from './Cities.module.css'
 
 const cities = [
   { name: 'Prague', country: 'Czech Republic', tag: 'Beer, bridges & nightlife', color: '#8B9E94' },
-  { name: 'Lisbon', country: 'Portugal', tag: 'Fado, hills & Atlantic sunsets', color: '#C4A882' },
-  { name: 'Sofia', country: 'Bulgaria', tag: 'Underrated, unfiltered, alive', color: '#9E8BAA' },
-  { name: 'Tallinn', country: 'Estonia', tag: 'Medieval cobblestones & saunas', color: '#7A9EAA' },
-  { name: 'Kraków', country: 'Poland', tag: 'History, parties, great beer', color: '#AA907A' },
-  { name: 'Tbilisi', country: 'Georgia', tag: 'Wine, architecture & soul', color: '#7AAA8B' },
+  { name: 'Rome', country: 'Italy', tag: 'History, pasta & la dolce vita', color: '#C4A882' },
 ]
 
 export default function Cities() {
@@ -19,8 +15,8 @@ export default function Cities() {
             <h2 className="section-title">Cities with a <em>real scene</em></h2>
           </div>
           <p className={styles.sub}>
-            We started with the cities that are still alive — where locals go out, stay late,
-            and haven't been priced out of their own neighborhoods yet.
+            We picked the cities where life happens on the streets — where locals stay out late,
+            share their table, and show you the side tourists never see.
           </p>
         </div>
 
@@ -39,7 +35,7 @@ export default function Cities() {
           ))}
         </div>
 
-        <p className={styles.more}>+ 6 more cities coming soon</p>
+        <p className={styles.more}>More cities coming soon</p>
       </div>
     </section>
   )

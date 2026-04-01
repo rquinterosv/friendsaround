@@ -4,7 +4,7 @@ const steps = [
   {
     num: '01',
     title: 'Pick your city',
-    desc: 'Choose from our curated list of European cities. Filter by vibe — nightlife, culture, hidden gems, or all of the above.',
+    desc: 'Choose between Prague or Rome. Each city has its own vibe — nightlife, culture, hidden gems, or all of the above.',
   },
   {
     num: '02',
@@ -42,9 +42,9 @@ export default function HowItWorks() {
 
         <div className={styles.callout}>
           <p className={styles.calloutText}>
-            "We spent a weekend in Sofia with a local. We drank rakia at a bar from 1968, walked through neighborhoods that didn't have names on Google Maps, and stayed out until the city woke up again."
+            "We spent a weekend in Prague with a local. We drank beer at a bar from 1968, walked through neighborhoods that didn't have names on Google Maps, and stayed out until the city woke up again."
           </p>
-          <span className={styles.calloutSource}>— Early traveler, Sofia trip</span>
+          <span className={styles.calloutSource}>— Early traveler, Prague trip</span>
         </div>
       </div>
     </section>

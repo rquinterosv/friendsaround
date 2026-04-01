@@ -10,13 +10,13 @@ const cards = [
   {
     quote: "Our guide took us to a bar that had been open since 1962. Then we ended up at a rave in an abandoned warehouse. Zero regrets.",
     name: 'Thomas B.',
-    from: 'Berlin → Sofia',
+    from: 'Berlin → Prague',
     initials: 'TB',
   },
   {
     quote: "Way cheaper than a tour package, way more real. I met people I'm still in touch with 8 months later.",
     name: 'Ana R.',
-    from: 'São Paulo → Lisbon',
+    from: 'São Paulo → Rome',
     initials: 'AR',
   },
 ]

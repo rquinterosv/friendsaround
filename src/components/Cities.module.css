@@ -20,7 +20,7 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 2px;
 }
 
@@ -32,16 +32,10 @@
 }
 
 .card:first-child {
-  border-radius: 4px 0 0 0;
-}
-.card:nth-child(3) {
-  border-radius: 0 4px 0 0;
-}
-.card:nth-child(4) {
-  border-radius: 0 0 0 4px;
+  border-radius: 4px 0 0 4px;
 }
 .card:last-child {
-  border-radius: 0 0 4px 0;
+  border-radius: 0 4px 4px 0;
 }
 
 .cardBg {
@@ -115,12 +109,9 @@
   }
 
   .grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 
-  .card:first-child { border-radius: 4px 0 0 0; }
-  .card:nth-child(3) { border-radius: 0; }
-  .card:nth-child(2) { border-radius: 0 4px 0 0; }
-  .card:nth-child(5) { border-radius: 0 0 0 4px; }
-  .card:last-child { border-radius: 0 0 4px 0; }
+  .card:first-child { border-radius: 4px 4px 0 0; }
+  .card:last-child { border-radius: 0 0 4px 4px; }
 }

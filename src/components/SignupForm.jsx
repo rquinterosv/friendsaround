@@ -1,33 +1,60 @@
 import { useState } from 'react'
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
+import { db } from '../firebase'
 import styles from './SignupForm.module.css'
 
-export default function SignupForm() {
-  const [role, setRole] = useState('traveler')
-  const [email, setEmail] = useState('')
-  const [submitted, setSubmitted] = useState(false)
+const initialForm = {
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  destination: '',
+  groupSize: '',
+  travelDate: '',
+}
 
-  const handleSubmit = (e) => {
+export default function SignupForm() {
+  const [form, setForm] = useState(initialForm)
+  const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const update = (field) => (e) => setForm({ ...form, [field]: e.target.value })
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!email) return
-    setSubmitted(true)
+    setLoading(true)
+    setError('')
+
+    try {
+      await addDoc(collection(db, 'requests'), {
+        ...form,
+        createdAt: serverTimestamp(),
+      })
+      setSubmitted(true)
+    } catch {
+      setError('Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <section id="signup" className={styles.section}>
       <div className={styles.inner}>
         <div className={styles.left}>
-          <p className="section-label" style={{ color: 'rgba(255,255,255,0.6)' }}>Early access</p>
+          <p className="section-label" style={{ color: 'rgba(255,255,255,0.6)' }}>Book your trip</p>
           <h2 className={styles.title}>
-            Be the first to<br />
-            <em>experience it</em>
+            Ready to<br />
+            <em>drift away?</em>
           </h2>
           <p className={styles.sub}>
-            We're launching city by city, starting with Prague.
-            Join the waitlist and we'll reach out when your city is live.
+            Tell us where you want to go and we'll connect you with a local
+            who'll show you the real city. No scripts, no tours — just life.
           </p>
 
           <div className={styles.perks}>
-            {['First access to new cities', 'Founding member pricing', 'Direct line to the team'].map((p, i) => (
+            {['We reply within 24 hours', 'Personalized experience', 'No hidden fees'].map((p, i) => (
               <div key={i} className={styles.perk}>
                 <span className={styles.check}>✓</span>
                 <span>{p}</span>
@@ -40,68 +67,114 @@ export default function SignupForm() {
           {submitted ? (
             <div className={styles.success}>
               <div className={styles.successIcon}>✓</div>
-              <h3 className={styles.successTitle}>You're on the list.</h3>
+              <h3 className={styles.successTitle}>Request sent!</h3>
               <p className={styles.successSub}>
-                We'll reach out as soon as your city goes live.
-                In the meantime, spread the word.
+                We'll get back to you within 24 hours to plan your trip.
               </p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className={styles.form}>
-              <h3 className={styles.formTitle}>Join the waitlist</h3>
+              <h3 className={styles.formTitle}>Plan your experience</h3>
 
-              <div className={styles.toggle}>
-                <button
-                  type="button"
-                  className={`${styles.toggleBtn} ${role === 'traveler' ? styles.active : ''}`}
-                  onClick={() => setRole('traveler')}
-                >
-                  I'm a traveler
-                </button>
-                <button
-                  type="button"
-                  className={`${styles.toggleBtn} ${role === 'guide' ? styles.active : ''}`}
-                  onClick={() => setRole('guide')}
-                >
-                  I want to be a guide
-                </button>
+              <div className={styles.row}>
+                <div className={styles.field}>
+                  <label className={styles.label}>First name</label>
+                  <input
+                    type="text"
+                    value={form.firstName}
+                    onChange={update('firstName')}
+                    placeholder="Rafael"
+                    className={styles.input}
+                    required
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label className={styles.label}>Last name</label>
+                  <input
+                    type="text"
+                    value={form.lastName}
+                    onChange={update('lastName')}
+                    placeholder="Quinteros"
+                    className={styles.input}
+                    required
+                  />
+                </div>
               </div>
 
-              {role === 'guide' && (
-                <p className={styles.guideNote}>
-                  Guides earn money showing their city to travelers who actually want to be there.
-                  We verify everyone — no experience required, just local knowledge.
-                </p>
-              )}
-
               <div className={styles.field}>
-                <label className={styles.label}>Email address</label>
+                <label className={styles.label}>Email</label>
                 <input
                   type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  value={form.email}
+                  onChange={update('email')}
                   placeholder="you@example.com"
                   className={styles.input}
                   required
                 />
               </div>
 
-              {role === 'guide' && (
-                <div className={styles.field}>
-                  <label className={styles.label}>Your city</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Prague, Lisbon, Sofia..."
-                    className={styles.input}
-                  />
-                </div>
-              )}
+              <div className={styles.field}>
+                <label className={styles.label}>Phone</label>
+                <input
+                  type="tel"
+                  value={form.phone}
+                  onChange={update('phone')}
+                  placeholder="+56 9 1234 5678"
+                  className={styles.input}
+                  required
+                />
+              </div>
 
-              <button type="submit" className={`primary ${styles.submit}`}>
-                {role === 'traveler' ? 'Join the waitlist' : 'Apply as a guide'}
+              <div className={styles.row}>
+                <div className={styles.field}>
+                  <label className={styles.label}>Destination</label>
+                  <select
+                    value={form.destination}
+                    onChange={update('destination')}
+                    className={styles.input}
+                    required
+                  >
+                    <option value="">Select a city</option>
+                    <option value="Prague">Prague</option>
+                    <option value="Rome">Rome</option>
+                  </select>
+                </div>
+                <div className={styles.field}>
+                  <label className={styles.label}>Group size</label>
+                  <select
+                    value={form.groupSize}
+                    onChange={update('groupSize')}
+                    className={styles.input}
+                    required
+                  >
+                    <option value="">How many?</option>
+                    <option value="1">1 person</option>
+                    <option value="2">2 people</option>
+                    <option value="3">3 people</option>
+                    <option value="4">4 people</option>
+                    <option value="5+">5+ people</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className={styles.field}>
+                <label className={styles.label}>When do you want to go?</label>
+                <input
+                  type="month"
+                  value={form.travelDate}
+                  onChange={update('travelDate')}
+                  className={styles.input}
+                  required
+                />
+              </div>
+
+              {error && <p className={styles.error}>{error}</p>}
+
+              <button type="submit" className={`primary ${styles.submit}`} disabled={loading}>
+                {loading ? 'Sending...' : 'Send request'}
               </button>
 
-              <p className={styles.privacy}>No spam. No sharing. Just updates when we're ready.</p>
+              <p className={styles.privacy}>No spam. No sharing. We'll only contact you about your trip.</p>
             </form>
           )}
         </div>
