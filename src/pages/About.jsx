@@ -23,7 +23,7 @@ export default function About() {
       <section className={styles.story}>
         <div className={styles.storyInner}>
           <div className={styles.profile}>
-            <div className={styles.avatar}>RQ</div>
+            <img src="/rafael.jpeg" alt="Rafael Quinteros" className={styles.avatar} />
             <div className={styles.profileInfo}>
               <h3 className={styles.name}>Rafael Quinteros</h3>
               <p className={styles.role}>Founder & fellow drifter</p>

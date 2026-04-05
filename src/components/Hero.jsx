@@ -29,7 +29,7 @@ export default function Hero() {
         <Link to="/" className={styles.logo}>drifter<em>trip</em></Link>
         <div className={styles.navLinks}>
           <Link to="/about" className={styles.navLink}>About us</Link>
-          <button className="primary" onClick={scrollToSignup}>Get early access</button>
+          <Link to="/packages" className={styles.navBtn}>Packages</Link>
         </div>
       </nav>
 
@@ -73,12 +73,12 @@ export default function Hero() {
       </div>
 
       <div className={styles.imageGrid}>
-        <div className={`${styles.imgBox} ${styles.img1}`}>
+        <Link to="/packages" className={`${styles.imgBox} ${styles.img1}`}>
           <div className={styles.tag}>Prague, CZ</div>
-        </div>
-        <div className={`${styles.imgBox} ${styles.img2}`}>
+        </Link>
+        <Link to="/packages" className={`${styles.imgBox} ${styles.img2}`}>
           <div className={styles.tag}>Rome, IT</div>
-        </div>
+        </Link>
       </div>
     </section>
   )

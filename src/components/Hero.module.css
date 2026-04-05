@@ -24,6 +24,7 @@
   color: var(--charcoal);
   letter-spacing: -0.01em;
   text-decoration: none;
+  text-transform: uppercase;
 }
 
 .logo em {
@@ -46,6 +47,22 @@
 
 .navLink:hover {
   color: var(--charcoal);
+}
+
+.navBtn {
+  background: var(--accent);
+  color: #fff;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 2px;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.navBtn:hover {
+  background: #A84716;
+  transform: translateY(-1px);
 }
 
 .content {
@@ -148,17 +165,25 @@
   background-position: center;
   position: relative;
   overflow: hidden;
+  display: block;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.imgBox:hover {
+  transform: scale(1.03) rotate(0deg) !important;
 }
 
 .img1 {
   background-color: #8B9E94;
-  background-image: linear-gradient(135deg, #5C7A6E 0%, #8B9E94 50%, #B2C4BC 100%);
+  background-image: url('https://images.unsplash.com/photo-1541849546-216549ae216d?w=800&q=80&auto=format&fit=crop');
   transform: rotate(1.5deg);
 }
 
 .img2 {
   background-color: #9E8B7A;
-  background-image: linear-gradient(135deg, #7A6454 0%, #9E8B7A 50%, #C4B5A8 100%);
+  background-image: url('https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800&q=80&auto=format&fit=crop');
   transform: rotate(-1deg);
   align-self: flex-end;
 }

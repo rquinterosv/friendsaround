@@ -26,9 +26,12 @@
 
 .card {
   position: relative;
-  height: 260px;
+  display: block;
+  height: 360px;
   overflow: hidden;
   cursor: pointer;
+  text-decoration: none;
+  color: inherit;
 }
 
 .card:first-child {
@@ -42,12 +45,8 @@
   position: absolute;
   inset: 0;
   background-color: var(--city-color);
-  background-image: linear-gradient(
-    to bottom right,
-    color-mix(in srgb, var(--city-color) 80%, #000 20%),
-    var(--city-color),
-    color-mix(in srgb, var(--city-color) 70%, #fff 30%)
-  );
+  background-size: cover;
+  background-position: center;
   transition: transform 0.5s ease;
 }
 
@@ -65,9 +64,9 @@
   justify-content: space-between;
   background: linear-gradient(
     to bottom,
-    rgba(0,0,0,0.12) 0%,
-    rgba(0,0,0,0.0) 40%,
-    rgba(0,0,0,0.35) 100%
+    rgba(0,0,0,0.35) 0%,
+    rgba(0,0,0,0.1) 40%,
+    rgba(0,0,0,0.7) 100%
   );
 }
 

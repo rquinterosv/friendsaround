@@ -3,14 +3,18 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase'
 import styles from './SignupForm.module.css'
 
+const today = new Date().toISOString().split('T')[0]
+
 const initialForm = {
   firstName: '',
   lastName: '',
   email: '',
   phone: '',
   destination: '',
+  package: '',
   groupSize: '',
-  travelDate: '',
+  arrivalDate: '',
+  departureDate: '',
 }
 
 export default function SignupForm() {
@@ -32,8 +36,9 @@ export default function SignupForm() {
         createdAt: serverTimestamp(),
       })
       setSubmitted(true)
-    } catch {
-      setError('Something went wrong. Please try again.')
+    } catch (err) {
+      console.error('Firestore error:', err)
+      setError(`Something went wrong: ${err?.code || err?.message || 'unknown error'}`)
     } finally {
       setLoading(false)
     }
@@ -140,32 +145,61 @@ export default function SignupForm() {
                   </select>
                 </div>
                 <div className={styles.field}>
-                  <label className={styles.label}>Group size</label>
+                  <label className={styles.label}>Package</label>
                   <select
-                    value={form.groupSize}
-                    onChange={update('groupSize')}
+                    value={form.package}
+                    onChange={update('package')}
                     className={styles.input}
                     required
                   >
-                    <option value="">How many?</option>
-                    <option value="1">1 person</option>
-                    <option value="2">2 people</option>
-                    <option value="3">3 people</option>
-                    <option value="4">4 people</option>
-                    <option value="5+">5+ people</option>
+                    <option value="">Choose a plan</option>
+                    <option value="Free Explorer">Free Explorer</option>
+                    <option value="Local Companion">Local Companion</option>
+                    <option value="Full Experience">Full Experience</option>
                   </select>
                 </div>
               </div>
 
               <div className={styles.field}>
-                <label className={styles.label}>When do you want to go?</label>
-                <input
-                  type="month"
-                  value={form.travelDate}
-                  onChange={update('travelDate')}
+                <label className={styles.label}>Group size</label>
+                <select
+                  value={form.groupSize}
+                  onChange={update('groupSize')}
                   className={styles.input}
                   required
-                />
+                >
+                  <option value="">How many?</option>
+                  <option value="1">1 person</option>
+                  <option value="2">2 people</option>
+                  <option value="3">3 people</option>
+                  <option value="4">4 people</option>
+                  <option value="5+">5+ people</option>
+                </select>
+              </div>
+
+              <div className={styles.row}>
+                <div className={styles.field}>
+                  <label className={styles.label}>Arrival date</label>
+                  <input
+                    type="date"
+                    value={form.arrivalDate}
+                    onChange={update('arrivalDate')}
+                    min={today}
+                    className={styles.input}
+                    required
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label className={styles.label}>Departure date</label>
+                  <input
+                    type="date"
+                    value={form.departureDate}
+                    onChange={update('departureDate')}
+                    min={form.arrivalDate || today}
+                    className={styles.input}
+                    required
+                  />
+                </div>
               </div>
 
               {error && <p className={styles.error}>{error}</p>}
