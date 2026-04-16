@@ -1,0 +1,428 @@
+.hero {
+  background: var(--cream);
+  padding: 0 24px 80px;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28px 0;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.logo {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--charcoal);
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.logo em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.backLink {
+  font-size: 14px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.backLink:hover {
+  color: var(--charcoal);
+}
+
+.content {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 64px 0 0;
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--charcoal);
+  margin-top: 8px;
+}
+
+.headline em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.sub {
+  font-size: 17px;
+  color: var(--muted);
+  line-height: 1.7;
+  font-weight: 300;
+  margin-top: 24px;
+  max-width: 580px;
+}
+
+.totalBudget {
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--muted);
+  background: var(--warm-white);
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.totalBudget strong {
+  color: var(--charcoal);
+  font-weight: 600;
+}
+
+.totalBudget span {
+  font-size: 12px;
+}
+
+/* Itinerary */
+.itinerarySection {
+  padding: 96px 0;
+  background: var(--warm-white);
+}
+
+.dayBlock {
+  margin-bottom: 96px;
+  padding-bottom: 96px;
+  border-bottom: 1px solid var(--border);
+}
+
+.dayBlock:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.dayHeader {
+  margin-bottom: 48px;
+  text-align: center;
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.dayNumber {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.dayTitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: var(--charcoal);
+  margin-top: 8px;
+  line-height: 1.15;
+}
+
+.dayIntro {
+  font-size: 16px;
+  color: var(--muted);
+  line-height: 1.7;
+  font-weight: 300;
+  margin-top: 16px;
+}
+
+/* Zigzag layout */
+.zigzag {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.zigzagReverse {
+  direction: rtl;
+}
+
+.zigzagReverse > * {
+  direction: ltr;
+}
+
+.zigzagContent {
+  min-width: 0;
+}
+
+.zigzagMap {
+  min-width: 0;
+}
+
+.mapSticky {
+  position: sticky;
+  top: 24px;
+}
+
+.timeBlock {
+  margin-bottom: 32px;
+}
+
+.timeLabel {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.spotCard {
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 24px;
+  margin-bottom: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.spotCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+}
+
+.spotHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.spotNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.spotName {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--charcoal);
+}
+
+.spotDesc {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.75;
+  font-weight: 300;
+}
+
+.spotPrice {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--charcoal);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.priceArrow {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.dayBudget {
+  background: var(--cream);
+  border: 2px solid var(--accent);
+  border-radius: 6px;
+  padding: 20px 28px;
+  font-size: 15px;
+  color: var(--charcoal);
+  text-align: center;
+  margin-top: 40px;
+}
+
+.dayBudget strong {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* Map */
+.map {
+  width: 100%;
+  height: 420px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  z-index: 0;
+}
+
+.mapLegend {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.legendNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.legendName {
+  font-size: 13px;
+  color: var(--charcoal);
+  font-weight: 500;
+}
+
+/* Map markers */
+.mapMarker {
+  background: none;
+  border: none;
+}
+
+.markerInner {
+  width: 32px;
+  height: 32px;
+  background: var(--accent, #C4571A);
+  color: #fff;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 2px solid #fff;
+}
+
+.markerInner::after {
+  content: attr(data-number);
+  transform: rotate(45deg);
+}
+
+/* CTA */
+.ctaSection {
+  padding: 96px 0;
+  background: var(--cream);
+}
+
+.ctaCard {
+  background: var(--warm-white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 64px 48px;
+  text-align: center;
+}
+
+.ctaDesc {
+  font-size: 16px;
+  color: var(--muted);
+  line-height: 1.7;
+  font-weight: 300;
+  max-width: 520px;
+  margin: 24px auto 40px;
+}
+
+.ctaDetails {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  margin-bottom: 40px;
+}
+
+.ctaDetail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ctaDetailLabel {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.ctaDetailValue {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--charcoal);
+  line-height: 1.2;
+}
+
+.ctaDetailNote {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 300;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .zigzag,
+  .zigzagReverse {
+    grid-template-columns: 1fr;
+    direction: ltr;
+  }
+
+  .mapSticky {
+    position: static;
+  }
+
+  .map {
+    height: 300px;
+  }
+
+  .zigzagMap {
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .ctaCard {
+    padding: 40px 24px;
+  }
+
+  .ctaDetails {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .spotCard {
+    padding: 20px;
+  }
+}
