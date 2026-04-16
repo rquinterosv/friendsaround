@@ -3,6 +3,7 @@ import Home from './pages/Home'
 import About from './pages/About'
 import Packages from './pages/Packages'
 import PragueItinerary from './pages/PragueItinerary'
+import Partners from './pages/Partners'
 import './App.css'
 
 export default function App() {
@@ -14,6 +15,7 @@ export default function App() {
           <Route path="/about" element={<About />} />
           <Route path="/packages" element={<Packages />} />
           <Route path="/itinerario/praga" element={<PragueItinerary />} />
+          <Route path="/partners" element={<Partners />} />
         </Routes>
       </div>
     </BrowserRouter>

@@ -29,6 +29,7 @@ export default function Hero() {
         <Link to="/" className={styles.logo}>drifter<em>trip</em></Link>
         <div className={styles.navLinks}>
           <Link to="/about" className={styles.navLink}>About us</Link>
+          <Link to="/partners" className={styles.navLink}>Day trips</Link>
           <Link to="/packages" className={styles.navBtn}>Packages</Link>
         </div>
       </nav>
