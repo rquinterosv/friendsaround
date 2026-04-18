@@ -34,7 +34,14 @@ export default function SignupForm() {
     try {
       await loginWithGoogle()
     } catch (err) {
-      setError(err.message)
+      console.error('Auth error:', err.code, err.message)
+      if (err.code === 'auth/popup-closed-by-user') {
+        setError('Please allow the popup to complete sign in')
+      } else if (err.code === 'auth/cancelled-popup-request') {
+        setError('Sign in was cancelled')
+      } else {
+        setError(err.message)
+      }
     } finally {
       setAuthLoading(false)
     }
