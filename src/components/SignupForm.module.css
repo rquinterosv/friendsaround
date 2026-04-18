@@ -197,8 +197,7 @@ select.input {
   margin-bottom: 8px;
 }
 
-.googleBtn,
-.facebookBtn {
+.googleBtn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -210,27 +209,16 @@ select.input {
   font-weight: 500;
   cursor: pointer;
   transition: opacity 0.2s;
-}
-
-.googleBtn {
   background: #fff;
   border: 1.5px solid var(--border);
   color: var(--charcoal);
 }
 
-.facebookBtn {
-  background: #1877F2;
-  border: none;
-  color: #fff;
-}
-
-.googleBtn:hover,
-.facebookBtn:hover {
+.googleBtn:hover {
   opacity: 0.9;
 }
 
-.googleBtn:disabled,
-.facebookBtn:disabled {
+.googleBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }

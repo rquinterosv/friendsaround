@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
-import { db, loginWithGoogle, loginWithFacebook, logout } from '../firebase'
+import { db, loginWithGoogle } from '../firebase'
 import { useAuth } from '../contexts/AuthContext'
 import styles from './Testimonials.module.css'
 
@@ -27,18 +27,6 @@ export default function Testimonials() {
     setError('')
     try {
       await loginWithGoogle()
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setAuthLoading(false)
-    }
-  }
-
-  const handleFacebookLogin = async () => {
-    setAuthLoading(true)
-    setError('')
-    try {
-      await loginWithFacebook()
     } catch (err) {
       setError(err.message)
     } finally {
