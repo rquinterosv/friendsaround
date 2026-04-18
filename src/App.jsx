@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
-import About from './pages/About'
+import Guides from './pages/Guides'
 import Packages from './pages/Packages'
 import PragueItinerary from './pages/PragueItinerary'
 import Partners from './pages/Partners'
@@ -12,7 +12,7 @@ export default function App() {
       <div className="app">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
+          <Route path="/guides" element={<Guides />} />
           <Route path="/packages" element={<Packages />} />
           <Route path="/itinerario/praga" element={<PragueItinerary />} />
           <Route path="/partners" element={<Partners />} />

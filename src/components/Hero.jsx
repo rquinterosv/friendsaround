@@ -35,7 +35,7 @@ export default function Hero() {
       <nav className={styles.nav}>
         <Link to="/" className={styles.logo}>drifter<em>trip</em></Link>
         <div className={styles.navLinks}>
-          <Link to="/about" className={styles.navLink}>About us</Link>
+          <Link to="/guides" className={styles.navLink}>Our Guides</Link>
           <Link to="/partners" className={styles.navLink}>Day trips</Link>
           <Link to="/packages" className={styles.navBtn}>Packages</Link>
         </div>
@@ -54,7 +54,7 @@ export default function Hero() {
 
       {menuOpen && (
         <div className={styles.mobileMenu} role="dialog" aria-modal="true">
-          <Link to="/about" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>About us</Link>
+          <Link to="/guides" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Our Guides</Link>
           <Link to="/partners" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Day trips</Link>
           <Link to="/packages" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Packages</Link>
           <button className={`primary ${styles.mobileCta}`} onClick={scrollToSignup}>Join the waitlist</button>

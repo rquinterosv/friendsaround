@@ -7,7 +7,7 @@ export default function Footer() {
       <div className={styles.inner}>
         <Link to="/" className={styles.logo}>drifter<em>trip</em></Link>
         <nav className={styles.links}>
-          <Link to="/about" className={styles.link}>About us</Link>
+          <Link to="/guides" className={styles.link}>Our Guides</Link>
           <Link to="/partners" className={styles.link}>Day trips</Link>
         </nav>
         <p className={styles.tagline}>Europe, as locals live it.</p>
