@@ -472,20 +472,114 @@
 }
 
 @media (max-width: 768px) {
+  .hero {
+    padding: 0 20px 56px;
+  }
+
+  .nav {
+    padding: 20px 0;
+  }
+
   .navLinks {
     gap: 16px;
   }
 
+  .content {
+    padding: 40px 0 0;
+  }
+
+  .sub {
+    font-size: 15px;
+    margin-top: 20px;
+  }
+
+  .countrySelector {
+    margin-top: 36px;
+  }
+
   .flagsRow {
-    gap: 14px;
+    gap: 12px;
   }
 
   .flagImgWrap {
-    width: 68px;
-    height: 46px;
+    width: 58px;
+    height: 40px;
   }
 
   .flagName {
-    font-size: 12px;
+    font-size: 11px;
+    text-align: center;
+  }
+
+  .flagBtn {
+    gap: 8px;
+  }
+
+  .comingSoonBadge {
+    font-size: 7px;
+    letter-spacing: 0.06em;
+  }
+
+  .trustBar {
+    padding: 32px 20px;
+  }
+
+  .trustGrid {
+    gap: 20px;
+  }
+
+  .trustNum {
+    font-size: 20px;
+  }
+
+  .toursSection {
+    padding: 64px 20px;
+  }
+
+  .tourBody {
+    padding: 24px 20px;
+  }
+
+  .tourName {
+    font-size: 22px;
+  }
+
+  .tourFooter {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .bookBtn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .navLinks .navLink {
+    display: none;
+  }
+
+  .flagsRow {
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .flagImgWrap {
+    width: 52px;
+    height: 36px;
+  }
+
+  .flagBtn {
+    flex: 0 0 auto;
+  }
+
+  .flagName {
+    font-size: 10px;
+  }
+
+  .trustGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
   }
 }

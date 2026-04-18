@@ -94,3 +94,17 @@ button.secondary {
 }
 
 button.secondary:hover { background: var(--cream); }
+
+@media (max-width: 768px) {
+  section { padding: 64px 20px; }
+
+  .container {
+    padding: 0;
+  }
+
+  button.primary,
+  button.secondary {
+    padding: 13px 22px;
+    font-size: 14px;
+  }
+}

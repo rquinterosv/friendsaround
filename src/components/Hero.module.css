@@ -65,6 +65,43 @@
   transform: translateY(-1px);
 }
 
+.hamburger {
+  display: none;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 20;
+}
+
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--charcoal);
+  border-radius: 2px;
+  transition: transform 0.25s ease, opacity 0.2s ease;
+}
+
+.hamburgerOpen span:nth-child(1) {
+  transform: translateY(10px) rotate(45deg);
+}
+.hamburgerOpen span:nth-child(2) {
+  opacity: 0;
+}
+.hamburgerOpen span:nth-child(3) {
+  transform: translateY(-10px) rotate(-45deg);
+}
+
+.mobileMenu {
+  display: none;
+}
+
 .content {
   max-width: 1100px;
   width: 100%;
@@ -211,6 +248,99 @@
   }
 
   .headline {
-    font-size: clamp(2.8rem, 10vw, 3.5rem);
+    font-size: clamp(2.6rem, 10vw, 3.4rem);
+    margin: 8px 0 24px;
   }
+
+  .hero {
+    min-height: auto;
+  }
+
+  .nav {
+    padding: 20px 0;
+  }
+
+  .navLinks {
+    display: none;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .mobileMenu {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: var(--cream);
+    padding: 96px 28px 32px;
+    gap: 8px;
+    z-index: 10;
+    animation: slideDown 0.25s ease;
+  }
+
+  .mobileLink {
+    font-family: var(--font-display);
+    font-size: 26px;
+    color: var(--charcoal);
+    text-decoration: none;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    font-weight: 500;
+  }
+
+  .mobileCta {
+    margin-top: 24px;
+    width: 100%;
+  }
+
+  .content {
+    padding: 48px 0 80px;
+  }
+
+  .sub {
+    font-size: 16px;
+    margin-bottom: 32px;
+  }
+
+  .actions {
+    margin-bottom: 48px;
+    width: 100%;
+  }
+
+  .actions button {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .stats {
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 0;
+  }
+
+  .statNum {
+    font-size: 18px;
+  }
+
+  .statLabel {
+    font-size: 11px;
+  }
+
+  .divider {
+    display: none;
+  }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }

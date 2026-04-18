@@ -7,6 +7,7 @@ const cities = ['Prague', 'Rome']
 export default function Hero() {
   const [cityIndex, setCityIndex] = useState(0)
   const [fading, setFading] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -19,7 +20,13 @@ export default function Hero() {
     return () => clearInterval(interval)
   }, [])
 
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [menuOpen])
+
   const scrollToSignup = () => {
+    setMenuOpen(false)
     document.getElementById('signup')?.scrollIntoView({ behavior: 'smooth' })
   }
 
@@ -32,7 +39,27 @@ export default function Hero() {
           <Link to="/partners" className={styles.navLink}>Day trips</Link>
           <Link to="/packages" className={styles.navBtn}>Packages</Link>
         </div>
+        <button
+          type="button"
+          className={`${styles.hamburger} ${menuOpen ? styles.hamburgerOpen : ''}`}
+          onClick={() => setMenuOpen(o => !o)}
+          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={menuOpen}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
       </nav>
+
+      {menuOpen && (
+        <div className={styles.mobileMenu} role="dialog" aria-modal="true">
+          <Link to="/about" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>About us</Link>
+          <Link to="/partners" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Day trips</Link>
+          <Link to="/packages" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Packages</Link>
+          <button className={`primary ${styles.mobileCta}`} onClick={scrollToSignup}>Join the waitlist</button>
+        </div>
+      )}
 
       <div className={styles.content}>
         <p className="section-label">Experience it like a local</p>
