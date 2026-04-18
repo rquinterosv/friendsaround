@@ -5,26 +5,18 @@ import styles from './Guides.module.css'
 
 const guides = [
   {
-    name: 'Rafa',
+    id: 'rafa',
+    name: 'Rafa Quinteros',
     city: 'Prague',
     experience: 'Castle to Charles Bridge walk + local bar crawl',
-    initials: 'RQ',
-  },
-  {
-    name: 'Marco',
-    city: 'Rome',
-    experience: 'Hidden neighborhoods & street food tour',
-    initials: 'MR',
-  },
-  {
-    name: 'Jana',
-    city: 'Prague',
-    experience: 'Communist history & underground culture',
-    initials: 'JK',
+    image: '/rafael.jpeg',
+    bio: "I've spent the last 4 years traveling the world — Latin America, Canada, New Zealand, Indonesia, Greece, Spain, Italy, Czech Republic, Germany, England, and more places still left to discover. Along the way I realized the best moments were never the tourist attractions. They were the nights out with locals, the hidden bars only regulars know about, the neighborhoods that don't appear on any travel guide.",
+    origin: 'From Chile',
   },
 ]
 
 export default function Guides() {
+  const [selectedGuide, setSelectedGuide] = useState(null)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -41,6 +33,46 @@ export default function Guides() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
+
+  if (selectedGuide) {
+    return (
+      <>
+        <section className={styles.profileHero}>
+          <nav className={styles.nav}>
+            <Link to="/" className={styles.logo}>drifter<em>trip</em></Link>
+            <button className={styles.backLink} onClick={() => setSelectedGuide(null)}>← Back to guides</button>
+          </nav>
+          <div className={styles.profileContent}>
+            <img src={selectedGuide.image} alt={selectedGuide.name} className={styles.profileAvatar} />
+            <div className={styles.profileInfo}>
+              <p className="section-label">Your guide</p>
+              <h1 className={styles.profileName}>{selectedGuide.name}</h1>
+              <p className={styles.profileLocation}>{selectedGuide.city} · {selectedGuide.origin}</p>
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.profileSection}>
+          <div className={styles.profileInner}>
+            <h2 className="section-title" style={{ marginBottom: '24px' }}>
+              The <em>experience</em>
+            </h2>
+            <p className={styles.profileExperience}>{selectedGuide.experience}</p>
+
+            <div className={styles.profileBio}>
+              <p>{selectedGuide.bio}</p>
+            </div>
+
+            <button className="primary" style={{ marginTop: '32px' }}>
+              Book this experience
+            </button>
+          </div>
+        </section>
+
+        <Footer />
+      </>
+    )
   }
 
   return (
@@ -67,10 +99,15 @@ export default function Guides() {
           </h2>
           <div className={styles.guidesGrid}>
             {guides.map((guide, i) => (
-              <div key={i} className={styles.guideCard}>
-                <div className={styles.guideAvatar}>
-                  <span className={styles.initials}>{guide.initials}</span>
-                </div>
+              <div
+                key={i}
+                className={styles.guideCard}
+                onClick={() => setSelectedGuide(guide)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === 'Enter' && setSelectedGuide(guide)}
+              >
+                <img src={guide.image} alt={guide.name} className={styles.guideImage} />
                 <h3 className={styles.guideName}>{guide.name}</h3>
                 <p className={styles.guideCity}>{guide.city}</p>
                 <p className={styles.guideExperience}>{guide.experience}</p>
