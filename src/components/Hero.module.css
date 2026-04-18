@@ -148,38 +148,6 @@
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
-  margin-bottom: 64px;
-}
-
-.stats {
-  display: flex;
-  align-items: center;
-  gap: 32px;
-}
-
-.stat {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.statNum {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--charcoal);
-}
-
-.statLabel {
-  font-size: 12px;
-  color: var(--muted);
-  letter-spacing: 0.04em;
-}
-
-.divider {
-  width: 1px;
-  height: 36px;
-  background: var(--border);
 }
 
 .imageGrid {
@@ -308,35 +276,12 @@
   }
 
   .actions {
-    margin-bottom: 48px;
     width: 100%;
   }
 
   .actions button {
     flex: 1;
     min-width: 0;
-  }
-
-  .stats {
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-
-  .stat {
-    flex: 1 1 calc(50% - 8px);
-    min-width: 0;
-  }
-
-  .statNum {
-    font-size: 18px;
-  }
-
-  .statLabel {
-    font-size: 11px;
-  }
-
-  .divider {
-    display: none;
   }
 }
 

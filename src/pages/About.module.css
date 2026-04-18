@@ -58,297 +58,109 @@
   color: var(--accent);
 }
 
-.heroSub {
-  font-size: 17px;
-  color: var(--muted);
-  line-height: 1.7;
-  font-weight: 300;
-  margin-top: 24px;
-  max-width: 620px;
-}
-
-.heroActions {
-  margin-top: 32px;
-}
-
-/* Guides grid */
-.guidesSection {
+.story {
   padding: 96px 24px;
   background: var(--warm-white);
 }
 
-.guidesGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 32px;
-}
-
-.guideCard {
-  background: var(--cream);
-  border-radius: 6px;
-  overflow: hidden;
-  display: grid;
-  grid-template-columns: 200px 1fr;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.guideCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
-}
-
-.guidePhotoWrap {
-  overflow: hidden;
-  min-height: 240px;
-}
-
-.guidePhoto {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.5s ease;
-}
-
-.guideCard:hover .guidePhoto {
-  transform: scale(1.05);
-}
-
-.guideBody {
-  padding: 28px 28px 28px 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.guideName {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--charcoal);
-  line-height: 1.2;
-}
-
-.guideCity {
-  font-size: 13px;
-  color: var(--muted);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-.guideTour {
-  font-size: 15px;
-  color: var(--accent);
-  font-weight: 500;
-  margin-bottom: 6px;
-}
-
-.guideDesc {
-  font-size: 14px;
-  color: var(--charcoal);
-  line-height: 1.6;
-  font-weight: 300;
-}
-
-/* Join our team section (own form — independent from SignupForm) */
-.joinSection {
-  background: var(--green);
-  padding: 96px 24px;
-}
-
-.joinInner {
-  max-width: 1100px;
+.storyInner {
+  max-width: 800px;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 80px;
-  align-items: center;
 }
 
-.joinTitle {
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 700;
-  color: #fff;
-  line-height: 1.1;
-  margin: 8px 0 20px;
-}
-
-.joinTitle em {
-  font-style: italic;
-  color: #A8D4BE;
-}
-
-.joinSub {
-  font-size: 16px;
-  color: rgba(255,255,255,0.65);
-  line-height: 1.7;
-  font-weight: 300;
-  margin-bottom: 36px;
-}
-
-.joinPerks {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.joinPerk {
+.profile {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 15px;
-  color: rgba(255,255,255,0.85);
+  gap: 24px;
+  margin-bottom: 48px;
 }
 
-.joinCheck {
-  width: 22px;
-  height: 22px;
+.avatar {
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  color: #A8D4BE;
+  object-fit: cover;
+  object-position: center 20%;
   flex-shrink: 0;
 }
 
-.form {
-  background: var(--warm-white);
-  border-radius: 4px;
-  padding: 40px;
+.profileInfo {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 2px;
 }
 
-.formTitle {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--charcoal);
-}
-
-.row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.label {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--muted);
-  letter-spacing: 0.04em;
-}
-
-.input {
-  border: 1.5px solid var(--border);
-  border-radius: 2px;
-  padding: 12px 14px;
-  font-family: var(--font-body);
-  font-size: 15px;
-  color: var(--charcoal);
-  background: #fff;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.input:focus {
-  border-color: var(--accent);
-}
-
-.input::placeholder {
-  color: #B0AAA4;
-}
-
-.textarea {
-  resize: vertical;
-  min-height: 120px;
-  line-height: 1.5;
-  font-family: var(--font-body);
-}
-
-.submit {
-  width: 100%;
-  padding: 15px;
-  font-size: 15px;
-  margin-top: 4px;
-}
-
-.privacy {
-  font-size: 12px;
-  color: var(--muted);
-  text-align: center;
-}
-
-.error {
-  font-size: 13px;
-  color: #c0392b;
-  text-align: center;
-  padding: 8px;
-  background: #fdecea;
-  border-radius: 2px;
-}
-
-.success {
-  background: var(--warm-white);
-  border-radius: 4px;
-  padding: 60px 40px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
-.successIcon {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: var(--green-light);
-  color: var(--green);
-  font-size: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.successTitle {
+.name {
   font-family: var(--font-display);
   font-size: 24px;
   font-weight: 700;
   color: var(--charcoal);
 }
 
-.successSub {
+.role {
   font-size: 15px;
-  color: var(--muted);
-  line-height: 1.6;
-  max-width: 320px;
+  color: var(--accent);
+  font-weight: 500;
 }
 
-@media (max-width: 900px) {
-  .guidesGrid {
-    grid-template-columns: 1fr;
-  }
+.origin {
+  font-size: 14px;
+  color: var(--muted);
+}
 
-  .guideCard {
-    grid-template-columns: 160px 1fr;
-  }
+.bio {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 
-  .guidePhotoWrap {
-    min-height: 100%;
-  }
+.bio p {
+  font-size: 17px;
+  line-height: 1.8;
+  color: var(--charcoal);
+  font-weight: 300;
+}
+
+.bio strong {
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.values {
+  padding: 96px 24px;
+  background: var(--cream);
+}
+
+.valuesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px;
+}
+
+.value {}
+
+.valueNum {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 16px;
+}
+
+.valueTitle {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--charcoal);
+  margin-bottom: 12px;
+}
+
+.valueDesc {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.7;
+  font-weight: 300;
 }
 
 @media (max-width: 768px) {
@@ -364,62 +176,27 @@
     padding: 40px 0 0;
   }
 
-  .heroSub {
-    font-size: 15px;
-    margin-top: 20px;
-  }
-
-  .heroActions {
-    margin-top: 24px;
-  }
-
-  .heroActions button {
-    width: 100%;
-  }
-
-  .guidesSection {
+  .story {
     padding: 64px 20px;
   }
 
-  .guidesGrid {
-    gap: 24px;
+  .bio p {
+    font-size: 16px;
+    line-height: 1.7;
   }
 
-  .guideCard {
-    grid-template-columns: 1fr;
-  }
-
-  .guidePhotoWrap {
-    min-height: 220px;
-    aspect-ratio: 16 / 9;
-  }
-
-  .guideBody {
-    padding: 22px 20px 24px;
-  }
-
-  .guideName {
-    font-size: 20px;
-  }
-
-  .joinSection {
+  .values {
     padding: 64px 20px;
   }
 
-  .joinInner {
+  .valuesGrid {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 36px;
   }
 
-  .form {
-    padding: 28px 22px;
-  }
-
-  .formTitle {
-    font-size: 20px;
-  }
-
-  .row {
-    grid-template-columns: 1fr;
+  .profile {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
   }
 }

@@ -81,23 +81,6 @@ export default function Hero() {
             How it works
           </button>
         </div>
-
-        <div className={styles.stats}>
-          <div className={styles.stat}>
-            <span className={styles.statNum}>2</span>
-            <span className={styles.statLabel}>Cities</span>
-          </div>
-          <div className={styles.divider} />
-          <div className={styles.stat}>
-            <span className={styles.statNum}>Verified</span>
-            <span className={styles.statLabel}>Local guides</span>
-          </div>
-          <div className={styles.divider} />
-          <div className={styles.stat}>
-            <span className={styles.statNum}>€0</span>
-            <span className={styles.statLabel}>Commission to join</span>
-          </div>
-        </div>
       </div>
 
       <div className={styles.imageGrid}>

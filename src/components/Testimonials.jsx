@@ -1,48 +1,136 @@
+import { useState } from 'react'
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
+import { db } from '../firebase'
 import styles from './Testimonials.module.css'
 
-const cards = [
-  {
-    quote: "I've traveled solo for 6 years. This was the first time I felt like I was actually inside a city, not just visiting it.",
-    name: 'Marta K.',
-    from: 'Warsaw → Prague',
-    initials: 'MK',
-  },
-  {
-    quote: "Our guide took us to a bar that had been open since 1962. Then we ended up at a rave in an abandoned warehouse. Zero regrets.",
-    name: 'Thomas B.',
-    from: 'Berlin → Prague',
-    initials: 'TB',
-  },
-  {
-    quote: "Way cheaper than a tour package, way more real. I met people I'm still in touch with 8 months later.",
-    name: 'Ana R.',
-    from: 'São Paulo → Rome',
-    initials: 'AR',
-  },
-]
+const initialForm = {
+  name: '',
+  trip: '',
+  quote: '',
+  email: '',
+}
 
 export default function Testimonials() {
+  const [form, setForm] = useState(initialForm)
+  const [open, setOpen] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const update = (field) => (e) => setForm({ ...form, [field]: e.target.value })
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+    try {
+      await addDoc(collection(db, 'testimonials'), {
+        ...form,
+        approved: false,
+        createdAt: serverTimestamp(),
+      })
+      setSubmitted(true)
+    } catch (err) {
+      console.error('Firestore error:', err)
+      setError(`Something went wrong: ${err?.code || err?.message || 'unknown error'}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <section className={styles.section}>
       <div className="container">
         <p className="section-label">From travelers</p>
-        <h2 className="section-title" style={{ marginBottom: '56px' }}>
-          What people <em>actually said</em>
+        <h2 className="section-title" style={{ marginBottom: '24px' }}>
+          Share your <em>drifter story</em>
         </h2>
+        <p className={styles.intro}>
+          We're just getting started — no curated quotes here yet. If you've traveled
+          with us, tell us how it went. Your words may show up on this page.
+        </p>
 
-        <div className={styles.grid}>
-          {cards.map((c, i) => (
-            <div key={i} className={styles.card}>
-              <p className={styles.quote}>"{c.quote}"</p>
-              <div className={styles.author}>
-                <div className={styles.avatar}>{c.initials}</div>
-                <div>
-                  <p className={styles.name}>{c.name}</p>
-                  <p className={styles.trip}>{c.from}</p>
+        <div className={styles.emptyCard}>
+          {submitted ? (
+            <div className={styles.successBlock}>
+              <div className={styles.successIcon}>✓</div>
+              <h3 className={styles.successTitle}>Thanks for sharing!</h3>
+              <p className={styles.successSub}>
+                We'll review your story and publish it soon.
+              </p>
+            </div>
+          ) : !open ? (
+            <div className={styles.cta}>
+              <p className={styles.ctaTitle}>Be the first to share your story</p>
+              <p className={styles.ctaSub}>
+                It takes a minute. No logins, no stars to rate — just your words.
+              </p>
+              <button type="button" className="primary" onClick={() => setOpen(true)}>
+                Share your story
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className={styles.form}>
+              <div className={styles.row}>
+                <div className={styles.field}>
+                  <label className={styles.label}>Your name</label>
+                  <input
+                    type="text"
+                    value={form.name}
+                    onChange={update('name')}
+                    placeholder="Marta K."
+                    className={styles.input}
+                    required
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label className={styles.label}>Your trip</label>
+                  <input
+                    type="text"
+                    value={form.trip}
+                    onChange={update('trip')}
+                    placeholder="Warsaw → Prague"
+                    className={styles.input}
+                    required
+                  />
                 </div>
               </div>
-            </div>
-          ))}
+
+              <div className={styles.field}>
+                <label className={styles.label}>Your story</label>
+                <textarea
+                  value={form.quote}
+                  onChange={update('quote')}
+                  placeholder="Tell us what the trip was like — in your own words."
+                  className={`${styles.input} ${styles.textarea}`}
+                  rows={4}
+                  required
+                />
+              </div>
+
+              <div className={styles.field}>
+                <label className={styles.label}>Email (optional)</label>
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={update('email')}
+                  placeholder="So we can reach you if we have questions"
+                  className={styles.input}
+                />
+              </div>
+
+              {error && <p className={styles.error}>{error}</p>}
+
+              <div className={styles.formActions}>
+                <button type="button" className={styles.cancel} onClick={() => setOpen(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="primary" disabled={loading}>
+                  {loading ? 'Sending...' : 'Post my story'}
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       </div>
     </section>
