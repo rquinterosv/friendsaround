@@ -58,119 +58,315 @@
   color: var(--accent);
 }
 
-.story {
+.heroSub {
+  font-size: 17px;
+  color: var(--muted);
+  line-height: 1.7;
+  font-weight: 300;
+  margin-top: 24px;
+  max-width: 620px;
+}
+
+.heroActions {
+  margin-top: 32px;
+}
+
+/* Guides grid */
+.guidesSection {
   padding: 96px 24px;
   background: var(--warm-white);
 }
 
-.storyInner {
-  max-width: 800px;
-  margin: 0 auto;
+.guidesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
 }
 
-.profile {
+.guideCard {
+  background: var(--cream);
+  border-radius: 6px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.guideCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
+}
+
+.guidePhotoWrap {
+  overflow: hidden;
+  min-height: 240px;
+}
+
+.guidePhoto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s ease;
+}
+
+.guideCard:hover .guidePhoto {
+  transform: scale(1.05);
+}
+
+.guideBody {
+  padding: 28px 28px 28px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.guideName {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--charcoal);
+  line-height: 1.2;
+}
+
+.guideCity {
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.guideTour {
+  font-size: 15px;
+  color: var(--accent);
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.guideDesc {
+  font-size: 14px;
+  color: var(--charcoal);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+/* Join our team section (own form — independent from SignupForm) */
+.joinSection {
+  background: var(--green);
+  padding: 96px 24px;
+}
+
+.joinInner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.joinTitle {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.1;
+  margin: 8px 0 20px;
+}
+
+.joinTitle em {
+  font-style: italic;
+  color: #A8D4BE;
+}
+
+.joinSub {
+  font-size: 16px;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.7;
+  font-weight: 300;
+  margin-bottom: 36px;
+}
+
+.joinPerks {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.joinPerk {
   display: flex;
   align-items: center;
-  gap: 24px;
-  margin-bottom: 48px;
+  gap: 12px;
+  font-size: 15px;
+  color: rgba(255,255,255,0.85);
 }
 
-.avatar {
-  width: 96px;
-  height: 96px;
+.joinCheck {
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  object-fit: cover;
-  object-position: center 20%;
+  background: rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #A8D4BE;
   flex-shrink: 0;
 }
 
-.profileInfo {
+.form {
+  background: var(--warm-white);
+  border-radius: 4px;
+  padding: 40px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 20px;
 }
 
-.name {
+.formTitle {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--charcoal);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.input {
+  border: 1.5px solid var(--border);
+  border-radius: 2px;
+  padding: 12px 14px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--charcoal);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  border-color: var(--accent);
+}
+
+.input::placeholder {
+  color: #B0AAA4;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.5;
+  font-family: var(--font-body);
+}
+
+.submit {
+  width: 100%;
+  padding: 15px;
+  font-size: 15px;
+  margin-top: 4px;
+}
+
+.privacy {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.error {
+  font-size: 13px;
+  color: #c0392b;
+  text-align: center;
+  padding: 8px;
+  background: #fdecea;
+  border-radius: 2px;
+}
+
+.success {
+  background: var(--warm-white);
+  border-radius: 4px;
+  padding: 60px 40px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.successIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--green-light);
+  color: var(--green);
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.successTitle {
   font-family: var(--font-display);
   font-size: 24px;
   font-weight: 700;
   color: var(--charcoal);
 }
 
-.role {
-  font-size: 15px;
-  color: var(--accent);
-  font-weight: 500;
-}
-
-.origin {
-  font-size: 14px;
-  color: var(--muted);
-}
-
-.bio {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.bio p {
-  font-size: 17px;
-  line-height: 1.8;
-  color: var(--charcoal);
-  font-weight: 300;
-}
-
-.bio strong {
-  font-weight: 500;
-  color: var(--accent);
-}
-
-.values {
-  padding: 96px 24px;
-  background: var(--cream);
-}
-
-.valuesGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 48px;
-}
-
-.value {}
-
-.valueNum {
-  font-family: var(--font-display);
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--accent);
-  display: block;
-  margin-bottom: 16px;
-}
-
-.valueTitle {
-  font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--charcoal);
-  margin-bottom: 12px;
-}
-
-.valueDesc {
+.successSub {
   font-size: 15px;
   color: var(--muted);
-  line-height: 1.7;
-  font-weight: 300;
+  line-height: 1.6;
+  max-width: 320px;
+}
+
+@media (max-width: 900px) {
+  .guidesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .guideCard {
+    grid-template-columns: 140px 1fr;
+  }
+
+  .guidePhotoWrap {
+    min-height: 100%;
+  }
 }
 
 @media (max-width: 768px) {
-  .valuesGrid {
+  .joinInner {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 48px;
   }
 
-  .profile {
-    flex-direction: column;
-    text-align: center;
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .guideCard {
+    grid-template-columns: 1fr;
+  }
+
+  .guidePhotoWrap {
+    min-height: 220px;
+    aspect-ratio: 16 / 9;
   }
 }
