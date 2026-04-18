@@ -28,6 +28,20 @@
   gap: 8px;
 }
 
+.authCta {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.authCta button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .ctaTitle {
   font-family: var(--font-display);
   font-size: 22px;

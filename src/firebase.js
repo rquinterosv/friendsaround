@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app"
 import { getFirestore } from "firebase/firestore"
+import { getAuth, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup, signOut } from "firebase/auth"
 
 const firebaseConfig = {
   apiKey: "AIzaSyCYWUXSvr8SX-FdcWvjD6RH7bP02817Okk",
@@ -13,3 +14,10 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig)
 export const db = getFirestore(app, 'trips')
+export const auth = getAuth(app)
+export const googleProvider = new GoogleAuthProvider()
+export const facebookProvider = new FacebookAuthProvider()
+
+export const loginWithGoogle = () => signInWithPopup(auth, googleProvider)
+export const loginWithFacebook = () => signInWithPopup(auth, facebookProvider)
+export const logout = () => signOut(auth)

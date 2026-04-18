@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
-import { db } from '../firebase'
+import { db, loginWithGoogle, loginWithFacebook, logout } from '../firebase'
+import { useAuth } from '../contexts/AuthContext'
 import styles from './Testimonials.module.css'
 
 const initialForm = {
@@ -11,13 +12,39 @@ const initialForm = {
 }
 
 export default function Testimonials() {
+  const { user } = useAuth()
   const [form, setForm] = useState(initialForm)
   const [open, setOpen] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [authLoading, setAuthLoading] = useState(false)
 
   const update = (field) => (e) => setForm({ ...form, [field]: e.target.value })
+
+  const handleGoogleLogin = async () => {
+    setAuthLoading(true)
+    setError('')
+    try {
+      await loginWithGoogle()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setAuthLoading(false)
+    }
+  }
+
+  const handleFacebookLogin = async () => {
+    setAuthLoading(true)
+    setError('')
+    try {
+      await loginWithFacebook()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setAuthLoading(false)
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -26,6 +53,8 @@ export default function Testimonials() {
     try {
       await addDoc(collection(db, 'testimonials'), {
         ...form,
+        userId: user?.uid,
+        userEmail: user?.email,
         approved: false,
         createdAt: serverTimestamp(),
       })
@@ -58,6 +87,16 @@ export default function Testimonials() {
               <p className={styles.successSub}>
                 We'll review your story and publish it soon.
               </p>
+            </div>
+          ) : !user ? (
+            <div className={styles.authCta}>
+              <p className={styles.ctaTitle}>Sign in to share your story</p>
+              <p className={styles.ctaSub}>
+                Sign in with Google or Facebook to tell us about your experience.
+              </p>
+              <button type="button" className="primary" onClick={handleGoogleLogin} disabled={authLoading}>
+                {authLoading ? 'Signing in...' : 'Sign in with Google'}
+              </button>
             </div>
           ) : !open ? (
             <div className={styles.cta}>
