@@ -158,6 +158,88 @@
   margin-bottom: 24px;
 }
 
+.authCta,
+.applyCta {
+  background: #fff;
+  border-radius: 8px;
+  padding: 48px;
+  text-align: center;
+}
+
+.ctaTitle {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--charcoal);
+  margin-bottom: 12px;
+}
+
+.ctaSub {
+  font-size: 16px;
+  color: var(--muted);
+  margin-bottom: 32px;
+  font-weight: 300;
+}
+
+.successBlock {
+  background: var(--green-light);
+  border-radius: 8px;
+  padding: 48px;
+  text-align: center;
+}
+
+.successIcon {
+  width: 64px;
+  height: 64px;
+  background: var(--green);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  font-size: 28px;
+  color: #fff;
+}
+
+.successTitle {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--charcoal);
+  margin-bottom: 8px;
+}
+
+.successSub {
+  font-size: 16px;
+  color: var(--muted);
+  font-weight: 300;
+}
+
+.formActions {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.cancel {
+  background: transparent;
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cancel:hover {
+  color: var(--charcoal);
+}
+
+.error {
+  color: #e53e3e;
+  font-size: 14px;
+  margin-top: 16px;
+}
+
 .label {
   display: block;
   font-size: 14px;

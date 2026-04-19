@@ -5,6 +5,7 @@ import Guides from './pages/Guides'
 import Packages from './pages/Packages'
 import PragueItinerary from './pages/PragueItinerary'
 import Partners from './pages/Partners'
+import Profile from './pages/Profile'
 import './App.css'
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
             <Route path="/packages" element={<Packages />} />
             <Route path="/itinerario/praga" element={<PragueItinerary />} />
             <Route path="/partners" element={<Partners />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </div>
       </BrowserRouter>

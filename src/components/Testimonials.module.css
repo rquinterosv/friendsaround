@@ -18,6 +18,7 @@
   padding: 56px 40px;
   max-width: 720px;
   margin: 0 auto;
+  margin-top: 30px;
 }
 
 .cta {
@@ -176,7 +177,112 @@
   max-width: 320px;
 }
 
+.carousel {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  cursor: pointer;
+}
+
+.carouselBtn {
+  background: var(--cream);
+  border: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--charcoal);
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.carouselBtn:hover {
+  background: var(--warm-white);
+}
+
+.carouselContent {
+  flex: 1;
+  text-align: center;
+  padding: 0 16px;
+}
+
+.carouselAvatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 24px;
+}
+
+.carouselQuote {
+  font-size: 20px;
+  line-height: 1.65;
+  font-weight: 400;
+  color: var(--charcoal);
+  margin: 0 0 24px;
+  font-style: italic;
+}
+
+.carouselMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.carouselName {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--charcoal);
+  font-style: normal;
+}
+
+.carouselTrip {
+  font-size: 14px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 @media (max-width: 768px) {
+  .carousel {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .carouselBtn {
+    display: none;
+  }
+
+  .carouselContent {
+    max-height: 280px;
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .carouselAvatar {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 16px;
+  }
+
+  .carouselQuote {
+    font-size: 15px;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .carouselMeta {
+    margin-top: 12px;
+  }
+
   .emptyCard {
     padding: 36px 22px;
   }

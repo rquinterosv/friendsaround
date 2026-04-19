@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
+import { db, loginWithGoogle } from '../firebase'
+import { useAuth } from '../contexts/AuthContext'
 import Footer from '../components/Footer'
 import styles from './Guides.module.css'
 
@@ -16,6 +19,7 @@ const guides = [
 ]
 
 export default function Guides() {
+  const { user } = useAuth()
   const [selectedGuide, setSelectedGuide] = useState(null)
   const [formData, setFormData] = useState({
     name: '',
@@ -23,16 +27,49 @@ export default function Guides() {
     location: '',
     experience: '',
   })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [submitted, setSubmitted] = useState(false)
+  const [authLoading, setAuthLoading] = useState(false)
+  const [showForm, setShowForm] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleGoogleLogin = async () => {
+    setAuthLoading(true)
+    setError('')
+    try {
+      await loginWithGoogle()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setAuthLoading(false)
+    }
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('Guide application:', formData)
-    alert('Thanks for your interest! We will be in touch soon.')
-    setFormData({ name: '', email: '', location: '', experience: '' })
+    setLoading(true)
+    setError('')
+    try {
+      await addDoc(collection(db, 'guides'), {
+        ...formData,
+        userId: user?.uid,
+        userEmail: user?.email,
+        approved: false,
+        createdAt: serverTimestamp(),
+      })
+      setSubmitted(true)
+      setFormData({ name: '', email: '', location: '', experience: '' })
+    } catch (err) {
+      console.error('Firestore error:', err)
+      setError(`Something went wrong: ${err?.code || err?.message || 'unknown error'}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
   }
 
   if (selectedGuide) {
@@ -130,65 +167,102 @@ export default function Guides() {
             </p>
           </div>
 
-          <form className={styles.form} onSubmit={handleSubmit}>
-            <div className={styles.formGroup}>
-              <label htmlFor="name" className={styles.label}>Full name</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className={styles.input}
-                required
-              />
+          {submitted ? (
+            <div className={styles.successBlock}>
+              <div className={styles.successIcon}>&#10003;</div>
+              <h3 className={styles.successTitle}>Thanks for applying!</h3>
+              <p className={styles.successSub}>
+                We'll review your application and get in touch soon.
+              </p>
             </div>
-
-            <div className={styles.formGroup}>
-              <label htmlFor="email" className={styles.label}>Email</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className={styles.input}
-                required
-              />
+          ) : !user ? (
+            <div className={styles.authCta}>
+              <p className={styles.ctaTitle}>Sign in to apply</p>
+              <p className={styles.ctaSub}>
+                Sign in with Google to apply as a guide.
+              </p>
+              <button type="button" className="primary" onClick={handleGoogleLogin} disabled={authLoading}>
+                {authLoading ? 'Signing in...' : 'Sign in with Google'}
+              </button>
             </div>
-
-            <div className={styles.formGroup}>
-              <label htmlFor="location" className={styles.label}>Country and city where you live</label>
-              <input
-                type="text"
-                id="location"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                className={styles.input}
-                placeholder="e.g. Czech Republic, Prague"
-                required
-              />
+          ) : !showForm ? (
+            <div className={styles.applyCta}>
+              <p className={styles.ctaTitle}>Apply to be a guide</p>
+              <p className={styles.ctaSub}>
+                Tell us about yourself and the experience you want to offer.
+              </p>
+              <button type="button" className="primary" onClick={() => setShowForm(true)}>
+                Start application
+              </button>
             </div>
+          ) : (
+            <form className={styles.form} onSubmit={handleSubmit}>
+              <div className={styles.formGroup}>
+                <label htmlFor="name" className={styles.label}>Full name</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className={styles.input}
+                  required
+                />
+              </div>
 
-            <div className={styles.formGroup}>
-              <label htmlFor="experience" className={styles.label}>Describe the experience or tour you want to offer</label>
-              <textarea
-                id="experience"
-                name="experience"
-                value={formData.experience}
-                onChange={handleChange}
-                className={styles.textarea}
-                rows={4}
-                placeholder="Tell us what makes your tour special..."
-                required
-              />
-            </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="email" className={styles.label}>Email</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className={styles.input}
+                  required
+                />
+              </div>
 
-            <button type="submit" className="primary">
-              Apply to be a guide
-            </button>
-          </form>
+              <div className={styles.formGroup}>
+                <label htmlFor="location" className={styles.label}>Country and city where you live</label>
+                <input
+                  type="text"
+                  id="location"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleChange}
+                  className={styles.input}
+                  placeholder="e.g. Czech Republic, Prague"
+                  required
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="experience" className={styles.label}>Describe the experience or tour you want to offer</label>
+                <textarea
+                  id="experience"
+                  name="experience"
+                  value={formData.experience}
+                  onChange={handleChange}
+                  className={styles.textarea}
+                  rows={4}
+                  placeholder="Tell us what makes your tour special..."
+                  required
+                />
+              </div>
+
+              {error && <p className={styles.error}>{error}</p>}
+
+              <div className={styles.formActions}>
+                <button type="button" className={styles.cancel} onClick={() => setShowForm(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="primary" disabled={loading}>
+                  {loading ? 'Sending...' : 'Apply to be a guide'}
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       </section>
 

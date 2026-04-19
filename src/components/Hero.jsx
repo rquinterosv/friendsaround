@@ -1,10 +1,63 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import { loginWithGoogle, logout } from '../firebase'
+import { User, LogOut, Settings, ChevronDown } from 'lucide-react'
 import styles from './Hero.module.css'
+
+function LoginPopup({ onClose }) {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleGoogleLogin = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      await loginWithGoogle()
+      onClose()
+    } catch (err) {
+      if (err.code === 'auth/popup-closed-by-user') {
+        setError('Please allow the popup to complete sign in')
+      } else if (err.code === 'auth/cancelled-popup-request') {
+        setError('Sign in was cancelled')
+      } else {
+        setError(err.message)
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className={styles.loginOverlay} onClick={onClose}>
+      <div className={styles.loginPopup} onClick={e => e.stopPropagation()}>
+        <button type="button" className={styles.closeBtn} onClick={onClose}>×</button>
+        <h3 className={styles.loginTitle}>Sign in to continue</h3>
+        <p className={styles.loginSub}>Choose a sign-in method</p>
+        <button
+          type="button"
+          className={styles.googleBtn}
+          onClick={handleGoogleLogin}
+          disabled={loading}
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.63l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.96 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.38-1.36-.38-2.09s.16-1.43.38-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.96 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          {loading ? 'Signing in...' : 'Continue with Google'}
+        </button>
+        {error && <p className={styles.loginError}>{error}</p>}
+      </div>
+    </div>
+  )
+}
 
 const cities = ['Prague', 'Rome']
 
 export default function Hero() {
+  const { user } = useAuth()
   const [cityIndex, setCityIndex] = useState(0)
   const [fading, setFading] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -30,6 +83,29 @@ export default function Hero() {
     document.getElementById('signup')?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  const [showLogin, setShowLogin] = useState(false)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dropdownRef = useRef(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      setDropdownOpen(false)
+    } catch (err) {
+      console.error('Logout error:', err)
+    }
+  }
+
   return (
     <section className={styles.hero}>
       <nav className={styles.nav}>
@@ -38,6 +114,41 @@ export default function Hero() {
           <Link to="/guides" className={styles.navLink}>Our Guides</Link>
           <Link to="/partners" className={styles.navLink}>Day trips</Link>
           <Link to="/packages" className={styles.navBtn}>Packages</Link>
+          {!user ? (
+            <button type="button" className={styles.navBtnOutline} onClick={() => setShowLogin(true)}>
+              <User size={16} />
+              <span>Sign in</span>
+            </button>
+          ) : (
+            <div className={styles.dropdown} ref={dropdownRef}>
+              <button 
+                type="button" 
+                className={styles.dropdownToggle}
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                <User size={16} />
+                <span>{user.displayName?.split(' ')[0] || 'Account'}</span>
+                <ChevronDown size={14} />
+              </button>
+              {dropdownOpen && (
+                <div className={styles.dropdownMenu}>
+                  <Link to="/profile" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                    <User size={16} />
+                    My Profile
+                  </Link>
+                  <Link to="/profile" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                    <Settings size={16} />
+                    Settings
+                  </Link>
+                  <button className={styles.dropdownItem} onClick={handleLogout}>
+                    <LogOut size={16} />
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+          {showLogin && <LoginPopup onClose={() => setShowLogin(false)} />}
         </div>
         <button
           type="button"
@@ -57,7 +168,29 @@ export default function Hero() {
           <Link to="/guides" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Our Guides</Link>
           <Link to="/partners" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Day trips</Link>
           <Link to="/packages" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Packages</Link>
-          <button className={`primary ${styles.mobileCta}`} onClick={scrollToSignup}>Join the waitlist</button>
+          {!user ? (
+            <button type="button" className={styles.mobileLinkBtn} onClick={() => { setMenuOpen(false); setShowLogin(true); }}>
+              <User size={20} />
+              <span>Sign in</span>
+            </button>
+          ) : (
+            <>
+              <Link to="/profile" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+                <User size={20} />
+                <span>My Profile</span>
+              </Link>
+              <Link to="/profile" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+                <Settings size={20} />
+                <span>Settings</span>
+              </Link>
+              <button className={styles.mobileLink} onClick={() => { handleLogout(); setMenuOpen(false); }}>
+                <LogOut size={20} />
+                <span>Sign out</span>
+              </button>
+            </>
+          )}
+          {!user && <button className={`primary ${styles.mobileCta}`} onClick={scrollToSignup}>Join the waitlist</button>}
+          {showLogin && <LoginPopup onClose={() => setShowLogin(false)} />}
         </div>
       )}
 

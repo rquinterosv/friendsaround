@@ -7,9 +7,6 @@ import styles from './SignupForm.module.css'
 const today = new Date().toISOString().split('T')[0]
 
 const initialForm = {
-  firstName: '',
-  lastName: '',
-  email: '',
   phone: '',
   destination: '',
   package: '',
@@ -64,7 +61,9 @@ export default function SignupForm() {
       await addDoc(collection(db, 'requests'), {
         ...form,
         userId: user.uid,
+        userName: user.displayName,
         userEmail: user.email,
+        userPhotoURL: user.photoURL,
         createdAt: serverTimestamp(),
       })
       setSubmitted(true)
@@ -165,43 +164,6 @@ export default function SignupForm() {
           ) : (
             <form onSubmit={handleSubmit} className={styles.form}>
               <h3 className={styles.formTitle}>Plan your experience</h3>
-
-              <div className={styles.row}>
-                <div className={styles.field}>
-                  <label className={styles.label}>First name</label>
-                  <input
-                    type="text"
-                    value={form.firstName}
-                    onChange={update('firstName')}
-                    placeholder="Rafael"
-                    className={styles.input}
-                    required
-                  />
-                </div>
-                <div className={styles.field}>
-                  <label className={styles.label}>Last name</label>
-                  <input
-                    type="text"
-                    value={form.lastName}
-                    onChange={update('lastName')}
-                    placeholder="Quinteros"
-                    className={styles.input}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className={styles.field}>
-                <label className={styles.label}>Email</label>
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={update('email')}
-                  placeholder="you@example.com"
-                  className={styles.input}
-                  required
-                />
-              </div>
 
               <div className={styles.field}>
                 <label className={styles.label}>Phone</label>
