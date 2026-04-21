@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import Footer from '../components/Footer'
 import SignupForm from '../components/SignupForm'
 import styles from './Packages.module.css'
@@ -51,6 +52,48 @@ const tiers = [
   },
 ]
 
+const pragueGuides = [
+  {
+    id: 'rafa',
+    name: 'Rafa Quinteros',
+    experience: 'Castle to Charles Bridge walk + local bar crawl',
+    image: '/rafael.jpeg',
+  },
+  {
+    id: 'marta',
+    name: 'Marta Kowalski',
+    experience: 'Historic pub crawl + local jazz bars',
+    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=500&fit=crop&crop=face',
+  },
+]
+
+const pragueTours = [
+  {
+    id: 'bohemian',
+    name: 'Bohemian & Saxon Switzerland',
+    departure: 'From Prague',
+    duration: '10 hours',
+    price: '€152',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/5/5f/Pravcicka_brana_001.jpg',
+  },
+  {
+    id: 'narnia',
+    name: 'Narnia Tour',
+    departure: 'From Prague',
+    duration: '12 hours',
+    price: '€140',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/3/3f/Tyssaerwaende2.jpg',
+  },
+  {
+    id: 'kutna',
+    name: 'Kutna Hora Bone Church',
+    departure: 'From Prague',
+    duration: '4 hours',
+    price: '€45',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Kostnicek3.jpg/1280px-Kostnicek3.jpg',
+  },
+]
+
 const galleries = [
   {
     city: 'Prague',
@@ -91,6 +134,10 @@ const galleries = [
 ]
 
 export default function Packages() {
+  const location = useLocation()
+  const isPrague = location.pathname === '/prague'
+  const [activeSection, setActiveSection] = useState('tiers')
+
   const scrollToCta = () => {
     document.getElementById('signup')?.scrollIntoView({ behavior: 'smooth' })
   }
@@ -103,75 +150,148 @@ export default function Packages() {
           <Link to="/" className={styles.backLink}>← Back to home</Link>
         </nav>
 
-        <div className={styles.content}>
-          <p className="section-label">How it works</p>
-          <h1 className={styles.headline}>
-            Three ways to<br />
-            <em>drift</em> with us
-          </h1>
-          <p className={styles.sub}>
-            Whether you want free tips or a fully planned trip, you pick how much
-            (or how little) help you need. Available in Prague and Rome — for 1, 2 or 3 days.
-          </p>
-        </div>
-      </section>
-
-      <section className={styles.tiersSection}>
-        <div className="container">
-          <div className={styles.grid}>
-            {tiers.map((tier, j) => (
-              <div
-                key={j}
-                className={`${styles.card} ${tier.highlight ? styles.highlight : ''}`}
-              >
-                {tier.highlight && <span className={styles.badge}>Most popular</span>}
-                <h3 className={styles.tierName}>{tier.name}</h3>
-                <p className={styles.tagline}>{tier.tagline}</p>
-                <div className={styles.priceBlock}>
-                  <p className={styles.price}>{tier.price}</p>
-                  <p className={styles.priceNote}>{tier.priceNote}</p>
-                </div>
-                <ul className={styles.includes}>
-                  {tier.includes.map((item, k) => (
-                    <li key={k}>{item}</li>
-                  ))}
-                </ul>
-                <button className="primary" onClick={scrollToCta}>
-                  {tier.cta}
-                </button>
-              </div>
-            ))}
+        {isPrague ? (
+          <div className={styles.content}>
+            <p className="section-label">Prague</p>
+            <h1 className={styles.headline}>
+              Your weekend in<br />
+              <em>Prague</em>
+            </h1>
+            <p className={styles.sub}>
+              Walking tours, day trips, and local experiences in Prague.
+            </p>
           </div>
-        </div>
+        ) : (
+          <div className={styles.content}>
+            <p className="section-label">How it works</p>
+            <h1 className={styles.headline}>
+              Three ways to<br />
+              <em>drift</em> with us
+            </h1>
+            <p className={styles.sub}>
+              Whether you want free tips or a fully planned trip, you pick how much
+              (or how little) help you need. Available in Prague and Rome — for 1, 2 or 3 days.
+            </p>
+          </div>
+        )}
       </section>
 
-      <section className={styles.gallerySection}>
-        <div className="container">
-          <p className="section-label" style={{ textAlign: 'center' }}>Where you'll go</p>
-          <h2 className="section-title" style={{ textAlign: 'center', marginBottom: '64px' }}>
-            Prague & Rome, <em>up close</em>
-          </h2>
+      {isPrague && (
+        <section className={styles.tiersSection}>
+          <div className="container">
+            <div className={styles.tabs}>
+              <button
+                className={`${styles.tab} ${activeSection === 'guides' ? styles.tabActive : ''}`}
+                onClick={() => setActiveSection('guides')}
+              >
+                Walking tours
+              </button>
+              <button
+                className={`${styles.tab} ${activeSection === 'tours' ? styles.tabActive : ''}`}
+                onClick={() => setActiveSection('tours')}
+              >
+                Day trips
+              </button>
+            </div>
 
-          {galleries.map((g, i) => (
-            <div key={i} className={styles.cityRow}>
-              <div className={styles.cityRowHeader}>
-                <h3 className={styles.cityRowName}>{g.city}</h3>
-                <span className={styles.cityRowCountry}>{g.country}</span>
-              </div>
-              <div className={styles.galleryGrid}>
-                {g.spots.map((s, j) => (
-                  <div key={j} className={styles.galleryItem}>
-                    <img src={s.image} alt={`${s.spot}, ${g.city}`} className={styles.galleryImg} />
-                    <div className={styles.galleryCaption}>
-                      <span className={styles.gallerySpot}>{s.spot}</span>
+            {activeSection === 'guides' ? (
+              <div className={styles.guidesGrid}>
+                {pragueGuides.map((guide) => (
+                  <Link to="/guides" key={guide.id} className={styles.guideCard}>
+                    <img src={guide.image} alt={guide.name} className={styles.guideImage} />
+                    <div className={styles.guideInfo}>
+                      <h3 className={styles.guideName}>{guide.name}</h3>
+                      <p className={styles.guideExperience}>{guide.experience}</p>
                     </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className={styles.toursList}>
+                {pragueTours.map((tour) => (
+                  <Link to="/partners" key={tour.id} className={styles.tourCard}>
+                    <div className={styles.tourImageWrap}>
+                      <img src={tour.image} alt={tour.name} className={styles.tourImage} />
+                      <span className={styles.tourDeparture}>{tour.departure}</span>
+                    </div>
+                    <div className={styles.tourBody}>
+                      <h3 className={styles.tourName}>{tour.name}</h3>
+                      <div className={styles.tourMeta}>
+                        <span className={styles.tourDetail}>{tour.duration}</span>
+                      </div>
+                      <div className={styles.tourPrice}>
+                        <span className={styles.tourPriceValue}>{tour.price}</span>
+                        <span className={styles.tourPricePer}>/ person</span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {!isPrague && (
+        <>
+          <section className={styles.tiersSection}>
+            <div className="container">
+              <div className={styles.grid}>
+                {tiers.map((tier, j) => (
+                  <div
+                    key={j}
+                    className={`${styles.card} ${tier.highlight ? styles.highlight : ''}`}
+                  >
+                    {tier.highlight && <span className={styles.badge}>Most popular</span>}
+                    <h3 className={styles.tierName}>{tier.name}</h3>
+                    <p className={styles.tagline}>{tier.tagline}</p>
+                    <div className={styles.priceBlock}>
+                      <p className={styles.price}>{tier.price}</p>
+                      <p className={styles.priceNote}>{tier.priceNote}</p>
+                    </div>
+                    <ul className={styles.includes}>
+                      {tier.includes.map((item, k) => (
+                        <li key={k}>{item}</li>
+                      ))}
+                    </ul>
+                    <button className="primary" onClick={scrollToCta}>
+                      {tier.cta}
+                    </button>
                   </div>
                 ))}
               </div>
             </div>
-          ))}
-        </div>
-      </section>
+          </section>
+
+          <section className={styles.gallerySection}>
+            <div className="container">
+              <p className="section-label" style={{ textAlign: 'center' }}>Where you'll go</p>
+              <h2 className="section-title" style={{ textAlign: 'center', marginBottom: '64px' }}>
+                Prague & Rome, <em>up close</em>
+              </h2>
+
+              {galleries.map((g, i) => (
+                <div key={i} className={styles.cityRow}>
+                  <div className={styles.cityRowHeader}>
+                    <h3 className={styles.cityRowName}>{g.city}</h3>
+                    <span className={styles.cityRowCountry}>{g.country}</span>
+                  </div>
+                  <div className={styles.galleryGrid}>
+                    {g.spots.map((s, j) => (
+                      <div key={j} className={styles.galleryItem}>
+                        <img src={s.image} alt={`${s.spot}, ${g.city}`} className={styles.galleryImg} />
+                        <div className={styles.galleryCaption}>
+                          <span className={styles.gallerySpot}>{s.spot}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </>
+      )}
 
       <SignupForm />
 

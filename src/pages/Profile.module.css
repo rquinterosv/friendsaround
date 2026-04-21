@@ -97,10 +97,85 @@
   font-weight: 600;
 }
 
+.photoEditor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.uploadBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--charcoal);
+  color: white;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.uploadBtn:hover {
+  background: var(--accent);
+}
+
+.fileInput {
+  display: none;
+}
+
+.photoUrlInput {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.photoUrlInput .input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.photoUrlBtn {
+  padding: 8px 12px;
+  background: var(--charcoal);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.nameInput {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--charcoal);
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  width: 100%;
+}
+
+.cityInput {
+  font-size: 14px;
+  color: var(--muted);
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  width: 100%;
+}
+
 .userInfo {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  align-items: center;
+  text-align: center;
 }
 
 .name {
@@ -115,6 +190,56 @@
   color: var(--muted);
 }
 
+.guideBadge {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: 2px;
+  margin-top: 8px;
+}
+
+.guideActions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.guideActionCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 32px;
+  background: var(--warm-white);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.guideActionCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+.guideActionTitle {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--charcoal);
+}
+
+.guideActionSub {
+  font-size: 13px;
+  color: var(--muted);
+}
+
 .logoutBtn {
   font-size: 14px;
   color: var(--muted);
@@ -123,10 +248,312 @@
   cursor: pointer;
   transition: color 0.2s;
   padding: 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .logoutBtn:hover {
   color: var(--charcoal);
+}
+
+.guideDashboard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.dashboardCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 24px;
+  background: var(--warm-white);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  color: var(--charcoal);
+}
+
+.dashboardCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+.dashboardTitle {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--charcoal);
+}
+
+.dashboardSub {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.daysHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.addDayBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--green);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.addDayBtn:hover {
+  background: #2d8a5e;
+}
+
+.removeDayBtn {
+  background: #fee2e2;
+  color: #dc2626;
+  border: none;
+  border-radius: 4px;
+  padding: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.removeDayBtn:hover {
+  background: #fecaca;
+}
+
+.experienceEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.experienceTextarea {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  resize: vertical;
+}
+
+.experienceTextarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.experienceDisplay {
+  padding: 20px;
+  background: var(--cream);
+  border-radius: 8px;
+}
+
+.experienceText {
+  font-size: 16px;
+  color: var(--charcoal);
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.bioText {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.6;
+  font-style: italic;
+}
+
+.dayIntro {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 16px;
+  font-style: italic;
+}
+
+.budgetInput {
+  width: 80px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.budgetInput:disabled {
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--accent);
+  text-align: right;
+}
+
+.input {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.tourEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin-bottom: 48px;
+}
+
+.dayEditor {
+  background: #fff;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+.dayEditorHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.dayTitle {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--charcoal);
+}
+
+.dayTitleInput {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--charcoal);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 4px;
+  flex: 1;
+  margin-right: 16px;
+}
+
+.dayIntroInput {
+  font-size: 15px;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
+.dayBudget {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.sectionsEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionEditor {
+  display: flex;
+  gap: 16px;
+}
+
+.sectionTime {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  min-width: 80px;
+}
+
+.spotsEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.spotEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.spotInput {
+  font-size: 15px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
+.spotTextarea {
+  font-size: 14px;
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 4px;
+  resize: vertical;
+  min-height: 60px;
+}
+
+.priceInput {
+  font-size: 14px;
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 4px;
+  width: 80px;
+}
+
+.spotDisplay {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  background: #fafafa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.spotDisplay strong {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--charcoal);
+}
+
+.spotDisplay p {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.spotDisplay span {
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 500;
 }
 
 .requests {
@@ -284,7 +711,42 @@
 
 @media (max-width: 768px) {
   .hero {
-    padding: 0 20px 56px;
+    padding: 0 20px 48px;
+  }
+
+  .nav {
+    padding: 20px 0;
+  }
+
+  .content {
+    padding: 40px 0 0;
+  }
+
+  .userCard {
+    flex-direction: column;
+    text-align: center;
+    padding: 32px 24px;
+  }
+
+  .avatar {
+    width: 80px;
+    height: 80px;
+    font-size: 28px;
+    font-weight: 600;
+  }
+
+  .userInfo {
+    align-items: center;
+  }
+
+  .guideActions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .guideActionCard {
+    width: 100%;
+    max-width: 300px;
   }
 
   .nav {
@@ -334,5 +796,28 @@
 
   .testimonialQuote {
     padding-left: 16px;
+  }
+
+  .guideDashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboardCard {
+    padding: 24px;
+  }
+
+  .dayEditorHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .sectionEditor {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .spotEditor {
+    gap: 4px;
   }
 }

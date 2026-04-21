@@ -18,13 +18,68 @@ const guides = [
   },
 ]
 
+function TermsModal({ onClose }) {
+  return (
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.modal} onClick={e => e.stopPropagation()}>
+        <button type="button" className={styles.modalClose} onClick={onClose}>×</button>
+        <h2 className={styles.modalTitle}>Terms of Service</h2>
+        <div className={styles.modalContent}>
+          <p><strong>1. Acceptance of Terms</strong></p>
+          <p>By accessing and using Drifter Trip, you accept and agree to be bound by the terms and provision of this agreement.</p>
+          <p><strong>2. Use License</strong></p>
+          <p>Permission is granted to use Drifter Trip for personal, non-commercial use only.</p>
+          <p><strong>3. User Conduct</strong></p>
+          <p>You agree to use the service responsibly and not for any unlawful purpose.</p>
+          <p><strong>4. Booking and Payments</strong></p>
+          <p>All bookings are subject to availability. Payments are processed securely through third-party providers.</p>
+          <p><strong>5. Cancellation Policy</strong></p>
+          <p>Cancellations made 48 hours before the trip will receive a full refund. Later cancellations are non-refundable.</p>
+          <p><strong>6. Limitation of Liability</strong></p>
+          <p>Drifter Trip acts as a connector between travelers and local guides. We are not liable for any incidents during the experience.</p>
+          <p><strong>7. Privacy</strong></p>
+          <p>We collect and process personal data in accordance with our Privacy Policy.</p>
+          <p><strong>8. Contact</strong></p>
+          <p>For questions about these terms, contact us at hello@driftertrip.com</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PrivacyModal({ onClose }) {
+  return (
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.modal} onClick={e => e.stopPropagation()}>
+        <button type="button" className={styles.modalClose} onClick={onClose}>×</button>
+        <h2 className={styles.modalTitle}>Privacy Policy</h2>
+        <div className={styles.modalContent}>
+          <p><strong>Information We Collect</strong></p>
+          <p>We collect information you provide directly, including name, email, phone number, and trip preferences.</p>
+          <p><strong>How We Use Your Information</strong></p>
+          <p>We use your information to process your booking requests, connect you with local guides, communicate about your trips, and improve our services.</p>
+          <p><strong>Data Sharing</strong></p>
+          <p>We share your information only with local guides necessary for your trip. We do not sell your data to third parties.</p>
+          <p><strong>Data Security</strong></p>
+          <p>We implement appropriate security measures to protect your personal data.</p>
+          <p><strong>Your Rights</strong></p>
+          <p>You have the right to access, correct, or delete your personal data. Contact us to exercise these rights.</p>
+          <p><strong>Contact</strong></p>
+          <p>For privacy concerns, contact us at hello@driftertrip.com</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Guides() {
   const { user } = useAuth()
   const [selectedGuide, setSelectedGuide] = useState(null)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    location: '',
+    country: '',
+    city: '',
     experience: '',
   })
   const [loading, setLoading] = useState(false)
@@ -32,6 +87,8 @@ export default function Guides() {
   const [submitted, setSubmitted] = useState(false)
   const [authLoading, setAuthLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
+  const [showTerms, setShowTerms] = useState(false)
+  const [showPrivacy, setShowPrivacy] = useState(false)
 
   const handleGoogleLogin = async () => {
     setAuthLoading(true)
@@ -58,7 +115,7 @@ export default function Guides() {
         createdAt: serverTimestamp(),
       })
       setSubmitted(true)
-      setFormData({ name: '', email: '', location: '', experience: '' })
+      setFormData({ name: '', email: '', country: '', city: '', experience: '' })
     } catch (err) {
       console.error('Firestore error:', err)
       setError(`Something went wrong: ${err?.code || err?.message || 'unknown error'}`)
@@ -223,18 +280,46 @@ export default function Guides() {
                 />
               </div>
 
-              <div className={styles.formGroup}>
-                <label htmlFor="location" className={styles.label}>Country and city where you live</label>
-                <input
-                  type="text"
-                  id="location"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleChange}
-                  className={styles.input}
-                  placeholder="e.g. Czech Republic, Prague"
-                  required
-                />
+              <div className={styles.row}>
+                <div className={styles.formGroup}>
+                  <label htmlFor="country" className={styles.label}>Country</label>
+                  <select
+                    id="country"
+                    name="country"
+                    value={formData.country}
+                    onChange={handleChange}
+                    className={styles.input}
+                    required
+                  >
+                    <option value="">Select a country</option>
+                    <option value="Czech Republic">Czech Republic</option>
+                    <option value="Italy">Italy</option>
+                    <option value="Spain">Spain</option>
+                    <option value="France">France</option>
+                    <option value="Germany">Germany</option>
+                    <option value="Portugal">Portugal</option>
+                    <option value="Netherlands">Netherlands</option>
+                    <option value="Poland">Poland</option>
+                    <option value="Austria">Austria</option>
+                    <option value="United Kingdom">United Kingdom</option>
+                    <option value="Greece">Greece</option>
+                    <option value="Hungary">Hungary</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div className={styles.formGroup}>
+                  <label htmlFor="city" className={styles.label}>City</label>
+                  <input
+                    type="text"
+                    id="city"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleChange}
+                    className={styles.input}
+                    placeholder="e.g. Prague"
+                    required
+                  />
+                </div>
               </div>
 
               <div className={styles.formGroup}>
@@ -261,12 +346,21 @@ export default function Guides() {
                   {loading ? 'Sending...' : 'Apply to be a guide'}
                 </button>
               </div>
+
+              <p className={styles.terms}>
+                By applying, you agree to our{' '}
+                <button type="button" className={styles.termsLink} onClick={() => setShowTerms(true)}>Terms of Service</button> and{' '}
+                <button type="button" className={styles.termsLink} onClick={() => setShowPrivacy(true)}>Privacy Policy</button>.
+              </p>
             </form>
           )}
         </div>
       </section>
 
       <Footer />
+
+      {showTerms && <TermsModal onClose={() => setShowTerms(false)} />}
+      {showPrivacy && <PrivacyModal onClose={() => setShowPrivacy(false)} />}
     </>
   )
 }

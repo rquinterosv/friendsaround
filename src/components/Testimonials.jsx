@@ -37,6 +37,60 @@ const initialForm = {
   quote: '',
 }
 
+function TermsModal({ onClose }) {
+  return (
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.modal} onClick={e => e.stopPropagation()}>
+        <button type="button" className={styles.modalClose} onClick={onClose}>×</button>
+        <h2 className={styles.modalTitle}>Terms of Service</h2>
+        <div className={styles.modalContent}>
+          <p><strong>1. Acceptance of Terms</strong></p>
+          <p>By accessing and using Drifter Trip, you accept and agree to be bound by the terms and provision of this agreement.</p>
+          <p><strong>2. Use License</strong></p>
+          <p>Permission is granted to use Drifter Trip for personal, non-commercial use only.</p>
+          <p><strong>3. User Conduct</strong></p>
+          <p>You agree to use the service responsibly and not for any unlawful purpose.</p>
+          <p><strong>4. Booking and Payments</strong></p>
+          <p>All bookings are subject to availability. Payments are processed securely through third-party providers.</p>
+          <p><strong>5. Cancellation Policy</strong></p>
+          <p>Cancellations made 48 hours before the trip will receive a full refund. Later cancellations are non-refundable.</p>
+          <p><strong>6. Limitation of Liability</strong></p>
+          <p>Drifter Trip acts as a connector between travelers and local guides. We are not liable for any incidents during the experience.</p>
+          <p><strong>7. Privacy</strong></p>
+          <p>We collect and process personal data in accordance with our Privacy Policy.</p>
+          <p><strong>8. Contact</strong></p>
+          <p>For questions about these terms, contact us at hello@driftertrip.com</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PrivacyModal({ onClose }) {
+  return (
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.modal} onClick={e => e.stopPropagation()}>
+        <button type="button" className={styles.modalClose} onClick={onClose}>×</button>
+        <h2 className={styles.modalTitle}>Privacy Policy</h2>
+        <div className={styles.modalContent}>
+          <p><strong>Information We Collect</strong></p>
+          <p>We collect information you provide directly, including name, email, phone number, and trip preferences.</p>
+          <p><strong>How We Use Your Information</strong></p>
+          <p>We use your information to process your booking requests, connect you with local guides, communicate about your trips, and improve our services.</p>
+          <p><strong>Data Sharing</strong></p>
+          <p>We share your information only with local guides necessary for your trip. We do not sell your data to third parties.</p>
+          <p><strong>Data Security</strong></p>
+          <p>We implement appropriate security measures to protect your personal data.</p>
+          <p><strong>Your Rights</strong></p>
+          <p>You have the right to access, correct, or delete your personal data. Contact us to exercise these rights.</p>
+          <p><strong>Contact</strong></p>
+          <p>For privacy concerns, contact us at hello@driftertrip.com</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Testimonials() {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -49,6 +103,10 @@ export default function Testimonials() {
   const [testimonials, setTestimonials] = useState([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [carouselLoading, setCarouselLoading] = useState(true)
+  const [showTerms, setShowTerms] = useState(false)
+  const [showPrivacy, setShowPrivacy] = useState(false)
+  const [termsAccepted, setTermsAccepted] = useState(false)
+  const [showTermsError, setShowTermsError] = useState(false)
 
   useEffect(() => {
     const fetchTestimonials = async () => {
@@ -109,6 +167,12 @@ export default function Testimonials() {
   const update = (field) => (e) => setForm({ ...form, [field]: e.target.value })
 
   const handleGoogleLogin = async () => {
+    if (!termsAccepted) {
+      setShowTermsError(true)
+      setError('Please accept the Terms and Privacy Policy to continue')
+      return
+    }
+    setShowTermsError(false)
     setAuthLoading(true)
     setError('')
     try {
@@ -212,6 +276,24 @@ export default function Testimonials() {
               <p className={styles.ctaSub}>
                 Sign in with Google or Facebook to tell us about your experience.
               </p>
+              <label className={`${styles.termsCheckbox} ${showTermsError ? styles.termsCheckboxError : ''}`}>
+                <input
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={(e) => {
+                    setTermsAccepted(e.target.checked)
+                    setShowTermsError(false)
+                    setError('')
+                  }}
+                />
+                <span>
+                  I agree to the{' '}
+                  <button type="button" onClick={() => setShowTerms(true)}>Terms of Service</button>
+                  {' '}and{' '}
+                  <button type="button" onClick={() => setShowPrivacy(true)}>Privacy Policy</button>
+                </span>
+              </label>
+              {showTermsError && <p className={styles.termsError}>Please accept the Terms and Privacy Policy to continue</p>}
               <button type="button" className="primary" onClick={handleGoogleLogin} disabled={authLoading}>
                 {authLoading ? 'Signing in...' : 'Sign in with Google'}
               </button>
@@ -262,10 +344,19 @@ export default function Testimonials() {
                   {loading ? 'Sending...' : 'Post my story'}
                 </button>
               </div>
+
+              <p className={styles.terms}>
+                By posting, you agree to our{' '}
+                <button type="button" className={styles.termsLink} onClick={() => setShowTerms(true)}>Terms of Service</button> and{' '}
+                <button type="button" className={styles.termsLink} onClick={() => setShowPrivacy(true)}>Privacy Policy</button>.
+              </p>
             </form>
           )}
         </div>
       </div>
+
+      {showTerms && <TermsModal onClose={() => setShowTerms(false)} />}
+      {showPrivacy && <PrivacyModal onClose={() => setShowPrivacy(false)} />}
     </section>
   )
 }
