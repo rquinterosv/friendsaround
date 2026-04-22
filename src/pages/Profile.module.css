@@ -203,6 +203,24 @@
   margin-top: 8px;
 }
 
+.viewAsUserBtn {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: underline;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.viewAsUserBtn:hover {
+  color: var(--charcoal);
+}
+
 .guideActions {
   display: flex;
   justify-content: center;
@@ -733,6 +751,7 @@
     flex-direction: column;
     text-align: center;
     padding: 32px 24px;
+    align-items: center;
   }
 
   .avatar {
@@ -740,6 +759,7 @@
     height: 80px;
     font-size: 28px;
     font-weight: 600;
+    margin: auto;
   }
 
   .userInfo {
@@ -771,12 +791,12 @@
   .profileInner {
     flex-direction: column;
     gap: 24px;
-    align-items: flex-start;
+    align-items: center;
   }
 
   .userCard {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     gap: 12px;
   }
 
@@ -941,4 +961,34 @@
   .mapPreviewEmpty {
     grid-column: span 1;
   }
+}
+
+.testimonialPhotos {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.testimonialPhoto {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.guideRedirect {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.guideRedirect h2 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--charcoal);
+  margin-bottom: 12px;
+}
+
+.guideRedirect p {
+  color: var(--muted);
+  font-size: 15px;
 }

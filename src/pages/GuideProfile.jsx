@@ -1,37 +1,11 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { collection, query, where, getDocs, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
+import { collection, query, where, getDocs, doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db, logout, uploadGuidePhoto } from '../firebase'
 import { useAuth } from '../contexts/AuthContext'
 import { MapPin, Quote, Calendar, Settings, LogOut, Edit, TrendingUp, MessageSquare, Users, Map, Plus, X, Save, Upload, Trash2, Image } from 'lucide-react'
 import Footer from '../components/Footer'
 import styles from './Profile.module.css'
-
-const cityToCountry = {
-  rome: { country: 'italy', flag: '🇮🇹' },
-  roma: { country: 'italy', flag: '🇮🇹' },
-  italy: { country: 'italy', flag: '🇮🇹' },
-  prague: { country: 'czech republic', flag: '🇨🇿' },
-  warsaw: { country: 'poland', flag: '🇵🇱' },
-  poland: { country: 'poland', flag: '🇵🇱' },
-  berlin: { country: 'germany', flag: '🇩🇪' },
-  germany: { country: 'germany', flag: '🇩🇪' },
-  madrid: { country: 'spain', flag: '🇪🇸' },
-  barcelona: { country: 'spain', flag: '🇪🇸' },
-  spain: { country: 'spain', flag: '🇪🇸' },
-  paris: { country: 'france', flag: '🇫🇷' },
-  france: { country: 'france', flag: '🇫🇷' },
-  london: { country: 'uk', flag: '🇬🇧' },
-  uk: { country: 'uk', flag: '🇬🇧' },
-  amsterdam: { country: 'netherlands', flag: '🇳🇱' },
-  netherlands: { country: 'netherlands', flag: '🇳🇱' },
-  lisbon: { country: 'portugal', flag: '🇵🇹' },
-  portgual: { country: 'portugal', flag: '🇵🇹' },
-  vienna: { country: 'austria', flag: '🇦🇹' },
-  austria: { country: 'austria', flag: '🇦🇹' },
-  budapest: { country: 'hungary', flag: '🇭🇺' },
-  hungary: { country: 'hungary', flag: '🇭🇺' },
-}
 
 function createEmptyDay(dayNum) {
   return {
@@ -45,271 +19,6 @@ function createEmptyDay(dayNum) {
     ],
     budget: '',
   }
-}
-
-export default function Profile() {
-  const { user } = useAuth()
-  const navigate = useNavigate()
-  const [requests, setRequests] = useState([])
-  const [testimonials, setTestimonials] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    if (!user) {
-      navigate('/')
-      return
-    }
-    loadData()
-  }, [user])
-
-  const loadData = async () => {
-    try {
-      const allReqSnap = await getDocs(collection(db, 'requests'))
-      const reqItems = allReqSnap.docs
-        .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(item => item.userId === user.uid)
-        .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
-      setRequests(reqItems)
-    } catch (err) {
-      console.error('Error loading requests:', err)
-      setRequests([])
-    }
-    
-    try {
-      const allTestSnap = await getDocs(collection(db, 'testimonials'))
-      const testItems = allTestSnap.docs
-        .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(item => item.userId === user.uid)
-        .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
-      setTestimonials(testItems)
-    } catch (testErr) {
-      console.error('Error loading testimonials:', testErr)
-      setTestimonials([])
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const getFlag = (trip) => {
-    if (!trip) return '🌍'
-    const city = trip.toLowerCase().split(/[\s→,\-]/)[0]
-    return cityToCountry[city]?.flag || '🌍'
-  }
-
-  const handleLogout = async () => {
-    try {
-      await logout()
-      navigate('/')
-    } catch (err) {
-      console.error('Logout error:', err)
-    }
-  }
-
-  const formatDate = (timestamp) => {
-    if (!timestamp) return ''
-    return timestamp.toDate().toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  }
-
-  if (!user) return null
-
-  const [isGuide, setIsGuide] = useState(false)
-  const [guideData, setGuideData] = useState(null)
-
-  useEffect(() => {
-    const checkGuide = async () => {
-      try {
-        const guideQuery = query(collection(db, 'guides'), where('userId', '==', user.uid))
-        const guideSnap = await getDocs(guideQuery)
-        if (!guideSnap.empty && guideSnap.docs[0].data().approved === true) {
-          setIsGuide(true)
-          setGuideData({ id: guideSnap.docs[0].id, ...guideSnap.docs[0].data() })
-        }
-      } catch (err) {
-        console.error('Error checking guide:', err)
-      }
-    }
-    checkGuide()
-  }, [user])
-
-  if (isGuide && guideData) {
-    return (
-      <>
-        <section className={styles.hero}>
-          <nav className={styles.nav}>
-            <Link to="/" className={styles.logo}>drifter<em>trip</em></Link>
-            <button onClick={handleLogout} className={styles.logoutBtn}>
-              <LogOut size={16} />
-              Sign out
-            </button>
-          </nav>
-          <div className={styles.content}>
-            <p className="section-label">You are a guide</p>
-            <h1 className={styles.headline}>
-              Welcome back,<br />
-              <em>{user.displayName?.split(' ')[0] || 'guide'}</em>
-            </h1>
-          </div>
-        </section>
-        <section className={styles.profile}>
-          <div className="container">
-            <div className={styles.guideRedirect}>
-              <h2>Guide Profile</h2>
-              <p>You have a guide profile. Click below to manage your guide profile.</p>
-              <Link to={`/guide/${guideData.id}`} className="primary" style={{ display: 'inline-flex', marginTop: '16px' }}>
-                Go to Guide Profile
-              </Link>
-              <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid var(--border)' }}>
-                <p style={{ marginBottom: '12px', color: 'var(--muted)' }}>You can also view your profile as a regular user to write reviews.</p>
-                <Link to="/profile?as=user" className="secondary" style={{ display: 'inline-flex' }}>
-                  View as User
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-        <Footer />
-      </>
-    )
-  }
-
-  return (
-    <>
-      <section className={styles.hero}>
-        <nav className={styles.nav}>
-          <Link to="/" className={styles.logo}>drifter<em>trip</em></Link>
-          <button onClick={handleLogout} className={styles.logoutBtn}>
-            <LogOut size={16} />
-            Sign out
-          </button>
-        </nav>
-
-        <div className={styles.content}>
-          <p className="section-label">Your profile</p>
-          <h1 className={styles.headline}>
-            Welcome back,<br />
-            <em>{user.displayName?.split(' ')[0] || 'traveler'}</em>
-          </h1>
-        </div>
-      </section>
-
-      <section className={styles.profile}>
-        <div className={styles.profileInner}>
-          <div className={styles.userCard}>
-            {user.photoURL ? (
-              <img src={user.photoURL} alt={user.displayName} className={styles.avatar} />
-            ) : (
-              <div className={styles.avatarPlaceholder}>
-                {user.displayName?.charAt(0) || user.email.charAt(0).toUpperCase()}
-              </div>
-            )}
-            <div className={styles.userInfo}>
-              <h3 className={styles.name}>{user.displayName || 'Traveler'}</h3>
-              <p className={styles.email}>{user.email}</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className={styles.requests}>
-        <div className="container">
-          <h2 className="section-title" style={{ marginBottom: '32px' }}>
-            Your <em>trips</em>
-          </h2>
-
-          {loading ? (
-            <p className={styles.loading}>Loading...</p>
-          ) : requests.length === 0 ? (
-            <div className={styles.empty}>
-              <p>You haven't sent any trip requests yet.</p>
-              <Link to="/#signup" className={styles.ctaBtn}>
-                Plan your first trip
-              </Link>
-            </div>
-          ) : (
-            <div className={styles.requestsList}>
-              {requests.map((req) => (
-                <div key={req.id} className={styles.requestCard}>
-                  <div className={styles.requestHeader}>
-                    <span className={styles.destination}>{req.destination}</span>
-                    <span className={styles.package}>{req.package}</span>
-                  </div>
-                  <div className={styles.requestDetails}>
-                    <div className={styles.detail}>
-                      <span className={styles.label}>Dates</span>
-                      <span>{req.arrivalDate} - {req.departureDate}</span>
-                    </div>
-                    <div className={styles.detail}>
-                      <span className={styles.label}>Group</span>
-                      <span>{req.groupSize} people</span>
-                    </div>
-                    <div className={styles.detail}>
-                      <span className={styles.label}>Requested</span>
-                      <span>{formatDate(req.createdAt)}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section className={styles.requests}>
-        <div className="container">
-          <h2 className="section-title" style={{ marginBottom: '32px' }}>
-            Your <em>reviews</em>
-          </h2>
-
-          {loading ? (
-            <p className={styles.loading}>Loading...</p>
-          ) : testimonials.length === 0 ? (
-            <div className={styles.empty}>
-              <p>You haven't shared any reviews yet.</p>
-              <Link to="/#testimonials" className={styles.ctaBtn}>
-                Write your first review
-              </Link>
-            </div>
-          ) : (
-            <div className={styles.testimonialsList}>
-              {testimonials.map((test) => (
-                <div key={test.id} className={styles.testimonialCard}>
-                  <div className={styles.testimonialHeader}>
-                    <span className={styles.destination}>
-                      <MapPin size={16} />
-                      {test.trip} {getFlag(test.trip)}
-                    </span>
-                    <span className={`${styles.status} ${test.approved ? styles.approved : styles.pending}`}>
-                      {test.approved ? 'Published' : 'Pending'}
-                    </span>
-                  </div>
-                  {test.photos && test.photos.length > 0 && (
-                    <div className={styles.testimonialPhotos}>
-                      {test.photos.filter(p => p).map((photo, i) => (
-                        <img key={i} src={photo} alt={`Review photo ${i + 1}`} className={styles.testimonialPhoto} />
-                      ))}
-                    </div>
-                  )}
-                  <blockquote className={styles.testimonialQuote}>
-                    <Quote size={18} className={styles.quoteIcon} />
-                    {test.quote}
-                  </blockquote>
-                  <div className={styles.testimonialDate}>
-                    {formatDate(test.createdAt)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      <Footer />
-    </>
-  )
 }
 
 function GuideMapPreview({ guide }) {
@@ -400,7 +109,75 @@ function GuideMapPreview({ guide }) {
   )
 }
 
-function GuideProfile({ user, guideData, onLogout }) {
+export default function GuideProfile() {
+  const { user } = useAuth()
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const [guideData, setGuideData] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/')
+      return
+    }
+    loadGuideData()
+  }, [user, id])
+
+  const loadGuideData = async () => {
+    try {
+      const guideRef = doc(db, 'guides', id)
+      const guideSnap = await getDoc(guideRef)
+      if (guideSnap.exists()) {
+        setGuideData({ id: guideSnap.id, ...guideSnap.data() })
+      }
+    } catch (err) {
+      console.error('Error loading guide data:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      navigate('/')
+    } catch (err) {
+      console.error('Logout error:', err)
+    }
+  }
+
+  if (!user || loading) return null
+
+  if (!guideData || guideData.userId !== user.uid) {
+    return (
+      <>
+        <section className={styles.hero}>
+          <nav className={styles.nav}>
+            <Link to="/" className={styles.logo}>drifter<em>trip</em></Link>
+            <button onClick={handleLogout} className={styles.logoutBtn}>
+              <LogOut size={16} />
+              Sign out
+            </button>
+          </nav>
+        </section>
+        <section className={styles.profile}>
+          <div className="container">
+            <p>You don't have permission to view this guide profile.</p>
+            <Link to="/profile" className="primary" style={{ marginTop: '16px', display: 'inline-flex' }}>
+              Go to your profile
+            </Link>
+          </div>
+        </section>
+        <Footer />
+      </>
+    )
+  }
+
+  return <GuideEditor user={user} guideData={guideData} onLogout={handleLogout} />
+}
+
+function GuideEditor({ user, guideData, onLogout }) {
   const [guide, setGuide] = useState({
     name: guideData?.name || user?.displayName || '',
     experience: guideData?.experience || '',
@@ -414,7 +191,6 @@ function GuideProfile({ user, guideData, onLogout }) {
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
-  const [photoFile, setPhotoFile] = useState(null)
 
   const handlePhotoUpload = async (e) => {
     const file = e.target.files[0]
@@ -435,13 +211,10 @@ function GuideProfile({ user, guideData, onLogout }) {
       return
     }
 
-    setPhotoFile(file)
     setUploading(true)
     
     try {
-      console.log('Uploading photo for user:', user.uid)
       const url = await uploadGuidePhoto(user.uid, file)
-      console.log('Photo uploaded successfully:', url)
       setGuide({ ...guide, photoURL: url })
     } catch (err) {
       console.error('Error uploading photo:', err)
@@ -511,13 +284,6 @@ function GuideProfile({ user, guideData, onLogout }) {
     newSections[sectionIndex] = { ...newSections[sectionIndex], spots: newSpots }
     newDays[dayIndex] = { ...newDays[dayIndex], sections: newSections }
     setGuide({ ...guide, days: newDays })
-  }
-
-  const handlePhotoUrlUpdate = () => {
-    if (newPhotoUrl.trim()) {
-      setGuide({ ...guide, photoURL: newPhotoUrl.trim() })
-      setNewPhotoUrl('')
-    }
   }
 
   return (
@@ -612,6 +378,9 @@ function GuideProfile({ user, guideData, onLogout }) {
                 </>
               )}
               <span className={styles.guideBadge}>Local Guide</span>
+              <Link to="/profile?as=user" className={styles.viewAsUserBtn}>
+                View as User
+              </Link>
             </div>
           </div>
         </div>
@@ -788,7 +557,27 @@ function GuideProfile({ user, guideData, onLogout }) {
             ))}
           </div>
 
-          <GuideMapPreview guide={guide} />
+          <div className={styles.guideDashboard}>
+            <Link to={`/itinerario/${guide?.city?.toLowerCase()}`} className={styles.dashboardCard}>
+              <Map size={32} />
+              <span className={styles.dashboardTitle}>View Itinerary</span>
+              <span className={styles.dashboardSub}>See on map</span>
+            </Link>
+
+            <div className={styles.dashboardCard}>
+              <Users size={32} />
+              <span className={styles.dashboardTitle}>Clients</span>
+              <span className={styles.dashboardSub}>No bookings yet</span>
+            </div>
+
+            <div className={styles.dashboardCard}>
+              <MessageSquare size={32} />
+              <span className={styles.dashboardTitle}>Reviews</span>
+              <span className={styles.dashboardSub}>No reviews yet</span>
+            </div>
+
+            <GuideMapPreview guide={guide} />
+          </div>
         </div>
       </section>
 

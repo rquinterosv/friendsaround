@@ -35,6 +35,7 @@ const cityToCountry = {
 const initialForm = {
   trip: '',
   quote: '',
+  photos: ['', '', ''],
 }
 
 function TermsModal({ onClose }) {
@@ -189,6 +190,7 @@ export default function Testimonials() {
     setLoading(true)
     setError('')
     try {
+      const photos = form.photos.filter(p => p.trim() !== '')
       await addDoc(collection(db, 'testimonials'), {
         name: user?.displayName || form.name,
         trip: form.trip,
@@ -196,6 +198,7 @@ export default function Testimonials() {
         email: user?.email || form.email,
         userId: user?.uid,
         userEmail: user?.email,
+        photos: photos,
         approved: false,
         createdAt: serverTimestamp(),
       })
@@ -332,6 +335,26 @@ export default function Testimonials() {
                   rows={4}
                   required
                 />
+              </div>
+
+              <div className={styles.field}>
+                <label className={styles.label}>Add up to 3 photos (URLs)</label>
+                <div className={styles.photosInputs}>
+                  {form.photos.map((photo, i) => (
+                    <input
+                      key={i}
+                      type="url"
+                      value={photo}
+                      onChange={(e) => {
+                        const newPhotos = [...form.photos]
+                        newPhotos[i] = e.target.value
+                        setForm({ ...form, photos: newPhotos })
+                      }}
+                      placeholder={`Photo ${i + 1} URL`}
+                      className={styles.input}
+                    />
+                  ))}
+                </div>
               </div>
 
               {error && <p className={styles.error}>{error}</p>}
