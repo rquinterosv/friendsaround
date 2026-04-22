@@ -266,16 +266,11 @@ export default function HowItWorks() {
   useEffect(() => {
     const fetchPragueGuides = async () => {
       try {
-        const q = query(
-          collection(db, 'guides'),
-          where('approved', '==', true),
-          where('country', '==', 'Czech Republic')
-        )
+        const q = query(collection(db, 'guides'), where('approved', '==', true))
         const snapshot = await getDocs(q)
-        const guides = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }))
+        const guides = snapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(g => g.country === 'Czech Republic')
         setPragueGuides(guides)
       } catch (err) {
         console.error('Error fetching Prague guides:', err)
@@ -285,16 +280,11 @@ export default function HowItWorks() {
     }
     const fetchRomeGuides = async () => {
       try {
-        const q = query(
-          collection(db, 'guides'),
-          where('approved', '==', true),
-          where('country', '==', 'Italy')
-        )
+        const q = query(collection(db, 'guides'), where('approved', '==', true))
         const snapshot = await getDocs(q)
-        const guides = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }))
+        const guides = snapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(g => g.country === 'Italy')
         setRomeGuides(guides)
       } catch (err) {
         console.error('Error fetching Rome guides:', err)
