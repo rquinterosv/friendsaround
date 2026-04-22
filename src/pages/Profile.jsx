@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { collection, query, where, getDocs, orderBy, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
+import { collection, query, where, getDocs, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 import { db, logout, uploadGuidePhoto } from '../firebase'
 import { useAuth } from '../contexts/AuthContext'
 import { MapPin, Quote, Calendar, Settings, LogOut, Edit, TrendingUp, MessageSquare, Users, Map, Plus, X, Save, Upload, Trash2, Image } from 'lucide-react'
@@ -39,9 +39,9 @@ function createEmptyDay(dayNum) {
     title: '',
     intro: '',
     sections: [
-      { time: 'Morning', spots: [{ name: '', description: '', price: '' }] },
-      { time: 'Afternoon', spots: [{ name: '', description: '', price: '' }] },
-      { time: 'Evening', spots: [{ name: '', description: '', price: '' }] },
+      { time: 'Morning', spots: [{ name: '', description: '', price: '', image: '', lat: '', lng: '' }] },
+      { time: 'Afternoon', spots: [{ name: '', description: '', price: '', image: '', lat: '', lng: '' }] },
+      { time: 'Evening', spots: [{ name: '', description: '', price: '', image: '', lat: '', lng: '' }] },
     ],
     budget: '',
   }
@@ -64,9 +64,12 @@ export default function Profile() {
 
   const loadData = async () => {
     try {
-      const requestsQuery = query(collection(db, 'requests'), where('userId', '==', user.uid), orderBy('createdAt', 'desc'))
-      const reqSnap = await getDocs(requestsQuery)
-      setRequests(reqSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })))
+      const allReqSnap = await getDocs(collection(db, 'requests'))
+      const reqItems = allReqSnap.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(item => item.userId === user.uid)
+        .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
+      setRequests(reqItems)
     } catch (err) {
       console.error('Error loading requests:', err)
       setRequests([])
@@ -265,6 +268,94 @@ export default function Profile() {
   )
 }
 
+function GuideMapPreview({ guide }) {
+  const allSpots = guide?.days?.flatMap(day => 
+    day.sections?.flatMap(s => s.spots?.filter(sp => sp.name && sp.lat && sp.lng) || []) || []
+  ) || []
+
+  const centerLat = allSpots.length > 0 
+    ? allSpots.reduce((sum, s) => sum + parseFloat(s.lat), 0) / allSpots.length
+    : 50.0755
+  const centerLng = allSpots.length > 0 
+    ? allSpots.reduce((sum, s) => sum + parseFloat(s.lng), 0) / allSpots.length
+    : 14.4378
+
+  if (allSpots.length === 0) {
+    return (
+      <div className={styles.mapPreviewEmpty}>
+        <Map size={48} />
+        <h3>Map Preview</h3>
+        <p>Add coordinates to your spots to see them on the map</p>
+        <p className={styles.hint}>Enter latitude and longitude for each spot in your itinerary</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className={styles.mapPreview}>
+      <div className={styles.mapPreviewHeader}>
+        <h3 className={styles.dashboardTitle}>Map Preview</h3>
+        <span className={styles.dashboardSub}>{allSpots.length} spots on map</span>
+      </div>
+      <div className={styles.mapEmbed}>
+        <iframe
+          title="Guide Itinerary Map"
+          width="100%"
+          height="100%"
+          style={{ border: 0, borderRadius: '8px' }}
+          loading="lazy"
+          srcDoc={`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+              <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+              <style>
+                * { margin: 0; padding: 0; }
+                #map { height: 100%; width: 100%; }
+                .custom-icon { background: #c45d3a; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+              </style>
+            </head>
+            <body>
+              <div id="map"></div>
+              <script>
+                var map = L.map('map').setView([${centerLat}, ${centerLng}], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                  attribution: '&copy; OpenStreetMap'
+                }).addTo(map);
+                
+                var bounds = [];
+                var spots = ${JSON.stringify(allSpots)};
+                var defaultIcon = L.divIcon({ className: 'custom-icon', html: '📍', iconSize: [30, 30] });
+                
+                spots.forEach(function(spot, i) {
+                  var marker = L.marker([parseFloat(spot.lat), parseFloat(spot.lng)], { icon: defaultIcon }).addTo(map);
+                  marker.bindPopup('<strong>' + spot.name + '</strong><br>' + (spot.description || ''));
+                  bounds.push(marker.getLatLng());
+                });
+                
+                if (bounds.length > 0) {
+                  map.fitBounds(bounds, { padding: [30, 30] });
+                }
+              </script>
+            </body>
+            </html>
+          `}
+        />
+      </div>
+      <a 
+        href={`https://www.google.com/maps/dir/${allSpots.map(s => `${s.lat},${s.lng}`).join('/')}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={styles.googleMapsBtn}
+      >
+        <MapPin size={16} />
+        Open Route in Google Maps
+      </a>
+    </div>
+  )
+}
+
 function GuideProfile({ user, guideData, onLogout }) {
   const [guide, setGuide] = useState({
     name: guideData?.name || user?.displayName || '',
@@ -295,15 +386,22 @@ function GuideProfile({ user, guideData, onLogout }) {
       return
     }
 
+    if (!user?.uid) {
+      alert('Error: User not authenticated')
+      return
+    }
+
     setPhotoFile(file)
     setUploading(true)
     
     try {
+      console.log('Uploading photo for user:', user.uid)
       const url = await uploadGuidePhoto(user.uid, file)
+      console.log('Photo uploaded successfully:', url)
       setGuide({ ...guide, photoURL: url })
     } catch (err) {
       console.error('Error uploading photo:', err)
-      alert('Error uploading photo')
+      alert(`Error uploading photo: ${err.message}`)
     } finally {
       setUploading(false)
     }
@@ -590,6 +688,22 @@ function GuideProfile({ user, guideData, onLogout }) {
                                   placeholder="Description"
                                   className={styles.spotTextarea}
                                 />
+                                <div className={styles.spotCoordsRow}>
+                                  <input
+                                    type="text"
+                                    value={spot.lat || ''}
+                                    onChange={(e) => updateSpot(dayIndex, sectionIndex, spotIndex, 'lat', e.target.value)}
+                                    placeholder="Latitude"
+                                    className={styles.coordInput}
+                                  />
+                                  <input
+                                    type="text"
+                                    value={spot.lng || ''}
+                                    onChange={(e) => updateSpot(dayIndex, sectionIndex, spotIndex, 'lng', e.target.value)}
+                                    placeholder="Longitude"
+                                    className={styles.coordInput}
+                                  />
+                                </div>
                                 <input
                                   type="text"
                                   value={spot.price}
@@ -597,12 +711,25 @@ function GuideProfile({ user, guideData, onLogout }) {
                                   placeholder="Price"
                                   className={styles.priceInput}
                                 />
+                                <input
+                                  type="url"
+                                  value={spot.image || ''}
+                                  onChange={(e) => updateSpot(dayIndex, sectionIndex, spotIndex, 'image', e.target.value)}
+                                  placeholder="Image URL (https://...)"
+                                  className={styles.spotInput}
+                                />
                               </>
                             ) : (
                               spot.name && (
                                 <div className={styles.spotDisplay}>
+                                  {spot.image && (
+                                    <img src={spot.image} alt={spot.name} className={styles.spotImage} />
+                                  )}
                                   <strong>{spot.name}</strong>
                                   <p>{spot.description}</p>
+                                  {spot.lat && spot.lng && (
+                                    <span className={styles.spotCoords}>📍 {parseFloat(spot.lat).toFixed(4)}, {parseFloat(spot.lng).toFixed(4)}</span>
+                                  )}
                                   <span>€{spot.price}</span>
                                 </div>
                               )
@@ -617,25 +744,7 @@ function GuideProfile({ user, guideData, onLogout }) {
             ))}
           </div>
 
-          <div className={styles.guideDashboard}>
-            <Link to={`/itinerario/${guide?.city?.toLowerCase()}`} className={styles.dashboardCard}>
-              <Map size={32} />
-              <span className={styles.dashboardTitle}>View Itinerary</span>
-              <span className={styles.dashboardSub}>See on map</span>
-            </Link>
-
-            <div className={styles.dashboardCard}>
-              <Users size={32} />
-              <span className={styles.dashboardTitle}>Clients</span>
-              <span className={styles.dashboardSub}>No bookings yet</span>
-            </div>
-
-            <div className={styles.dashboardCard}>
-              <MessageSquare size={32} />
-              <span className={styles.dashboardTitle}>Reviews</span>
-              <span className={styles.dashboardSub}>No reviews yet</span>
-            </div>
-          </div>
+          <GuideMapPreview guide={guide} />
         </div>
       </section>
 

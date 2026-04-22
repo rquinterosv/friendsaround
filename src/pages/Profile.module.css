@@ -538,6 +538,13 @@
   border-radius: 4px;
 }
 
+.spotDisplay .spotImage {
+  width: 100%;
+  max-height: 150px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
 .spotDisplay strong {
   font-size: 15px;
   font-weight: 600;
@@ -819,5 +826,119 @@
 
   .spotEditor {
     gap: 4px;
+  }
+}
+
+.spotCoordsRow {
+  display: flex;
+  gap: 8px;
+}
+
+.coordInput {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 13px;
+  width: 100%;
+}
+
+.spotCoords {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: monospace;
+}
+
+.mapPreview {
+  grid-column: span 3;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.mapPreviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.mapPreview .dashboardTitle {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--charcoal);
+  margin: 0;
+}
+
+.mapPreview .dashboardSub {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.mapEmbed {
+  height: 300px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.googleMapsBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  background: #1a73e8;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+.googleMapsBtn:hover {
+  background: #1557b0;
+}
+
+.mapPreviewEmpty {
+  grid-column: span 3;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.mapPreviewEmpty svg {
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.mapPreviewEmpty h3 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--charcoal);
+  margin-bottom: 8px;
+}
+
+.mapPreviewEmpty p {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.mapPreviewEmpty .hint {
+  font-size: 12px;
+  margin-top: 8px;
+  color: var(--accent);
+}
+
+@media (max-width: 1024px) {
+  .mapPreview,
+  .mapPreviewEmpty {
+    grid-column: span 1;
   }
 }

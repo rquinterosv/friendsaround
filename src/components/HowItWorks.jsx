@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { db } from '../firebase'
+import { ChevronLeft, ChevronRight, X, MapPin, Clock, Coffee, Sunset, Moon, Map, ExternalLink } from 'lucide-react'
 import styles from './HowItWorks.module.css'
 
 const steps = [
@@ -60,12 +61,207 @@ const pragueTours = [
   },
 ]
 
+function DayTripsModal({ guide, onClose }) {
+  const guideName = guide?.name || 'Guide'
+  const itinerary = guide?.days || []
+  const [currentDay, setCurrentDay] = useState(0)
+  const [showMap, setShowMap] = useState(false)
+
+  const allSpots = itinerary.flatMap(day => 
+    day.sections?.flatMap(s => s.spots?.filter(sp => sp.name) || []) || []
+  )
+
+  if (!itinerary || itinerary.length === 0) {
+    return (
+      <div className={styles.modalOverlay} onClick={onClose}>
+        <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+          <button type="button" className={styles.modalClose} onClick={onClose}>
+            <X size={24} />
+          </button>
+          <div className={styles.modalHeader}>
+            <span className="section-label">{guideName}'s Weekend</span>
+            <h2 className={styles.modalTitle}>3-Day Itinerary</h2>
+            <p className={styles.noItinerary}>No itinerary available yet.</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const nextDay = () => setCurrentDay((c) => (c + 1) % itinerary.length)
+  const prevDay = () => setCurrentDay((c) => (c - 1 + itinerary.length) % itinerary.length)
+
+  return (
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <button type="button" className={styles.modalClose} onClick={onClose}>
+          <X size={24} />
+        </button>
+        <div className={styles.modalHeader}>
+          <span className="section-label">{guideName}'s Weekend</span>
+          <h2 className={styles.modalTitle}>{itinerary.length}-Day Itinerary</h2>
+        </div>
+        
+        <div className={styles.carouselContainer}>
+          <button className={styles.carouselBtn} onClick={prevDay} aria-label="Previous day">
+            <ChevronLeft size={24} />
+          </button>
+          
+          <div className={styles.carouselSlide}>
+            <div className={styles.dayContent}>
+              <div className={styles.dayHeader}>
+                <h3 className={styles.dayTitle}>Day {itinerary[currentDay].day}: {itinerary[currentDay].title}</h3>
+                {itinerary[currentDay].budget && (
+                  <span className={styles.dayBudget}>€{itinerary[currentDay].budget}</span>
+                )}
+              </div>
+              {itinerary[currentDay].intro && (
+                <p className={styles.dayDescription}>{itinerary[currentDay].intro}</p>
+              )}
+              
+              {(() => {
+                const allSpots = itinerary[currentDay].sections?.flatMap(s => s.spots?.filter(sp => sp.name) || []) || []
+                const spotImages = allSpots.filter(sp => sp.image)
+                if (spotImages.length > 0) {
+                  return (
+                    <div className={styles.spotImagesGrid}>
+                      {spotImages.map((spot, i) => (
+                        <div key={i} className={styles.spotImageCard}>
+                          <img src={spot.image} alt={spot.name} className={styles.spotImage} />
+                          <span className={styles.spotImageLabel}>{spot.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                }
+                return null
+              })()}
+              
+              <div className={styles.activitiesList}>
+                {itinerary[currentDay].sections?.map((section, sectionIndex) => (
+                  <div key={sectionIndex} className={styles.sectionBlock}>
+                    <span className={styles.sectionTime}>{section.time}</span>
+                    {section.spots?.filter(s => s.name).map((spot, spotIndex) => (
+                      <div key={spotIndex} className={styles.activityItem}>
+                        <MapPin size={14} className={styles.activityIcon} />
+                        <div className={styles.spotContent}>
+                          <span className={styles.activityText}>{spot.name}</span>
+                          {spot.description && <span className={styles.spotDesc}>{spot.description}</span>}
+                          {spot.price && <span className={styles.spotPrice}>€{spot.price}</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          <button className={styles.carouselBtn} onClick={nextDay} aria-label="Next day">
+            <ChevronRight size={24} />
+          </button>
+        </div>
+        
+        <div className={styles.carouselDots}>
+          {itinerary.map((_, i) => (
+            <button
+              key={i}
+              className={`${styles.dot} ${i === currentDay ? styles.dotActive : ''}`}
+              onClick={() => setCurrentDay(i)}
+              aria-label={`Go to day ${i + 1}`}
+            />
+          ))}
+        </div>
+
+        <div className={styles.mapSection}>
+          <button 
+            className={styles.mapButton}
+            onClick={() => setShowMap(!showMap)}
+          >
+            <Map size={18} />
+            {showMap ? 'Hide Map' : `View ${allSpots.length} Spots on Map`}
+          </button>
+          
+          {showMap && (
+            <div className={styles.mapContainer}>
+              <div className={styles.mapEmbed}>
+                {allSpots.length > 0 ? (
+                  <iframe
+                    title="Itinerary Map"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0, borderRadius: '8px' }}
+                    loading="lazy"
+                    srcDoc={`
+                      <!DOCTYPE html>
+                      <html>
+                      <head>
+                        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+                        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+                        <style>
+                          * { margin: 0; padding: 0; }
+                          #map { height: 100%; width: 100%; }
+                          .custom-icon { background: #c45d3a; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+                        </style>
+                      </head>
+                      <body>
+                        <div id="map"></div>
+                        <script>
+                          var map = L.map('map').setView([50.0755, 14.4378], 13);
+                          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '&copy; OpenStreetMap contributors'
+                          }).addTo(map);
+                          
+                          var bounds = [];
+                          var spots = ${JSON.stringify(allSpots.map(s => ({ name: s.name, description: s.description })))};
+                          var defaultIcon = L.divIcon({ className: 'custom-icon', html: '📍', iconSize: [24, 24] });
+                          
+                          spots.forEach(function(spot, i) {
+                            var marker = L.marker([50.0755 + (Math.random() - 0.5) * 0.02, 14.4378 + (Math.random() - 0.5) * 0.02], { icon: defaultIcon }).addTo(map);
+                            marker.bindPopup('<strong>' + spot.name + '</strong><br>' + (spot.description || ''));
+                            bounds.push(marker.getLatLng());
+                          });
+                          
+                          if (bounds.length > 0) {
+                            map.fitBounds(bounds, { padding: [50, 50] });
+                          }
+                        </script>
+                      </body>
+                      </html>
+                    `}
+                  />
+                ) : (
+                  <div className={styles.noMapMessage}>
+                    <MapPin size={32} />
+                    <p>Add spots to see them on the map</p>
+                  </div>
+                )}
+              </div>
+              <a 
+                href={`https://www.google.com/maps/search/${allSpots.map(s => encodeURIComponent(s.name)).join('/')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.googleMapsLink}
+              >
+                <ExternalLink size={14} />
+                Open in Google Maps
+              </a>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function HowItWorks() {
   const [selectedCity, setSelectedCity] = useState(null)
   const [pragueGuides, setPragueGuides] = useState([])
   const [romeGuides, setRomeGuides] = useState([])
   const [loadingPragueGuides, setLoadingPragueGuides] = useState(true)
   const [loadingRomeGuides, setLoadingRomeGuides] = useState(true)
+  const [showDayTripsModal, setShowDayTripsModal] = useState(false)
+  const [selectedGuide, setSelectedGuide] = useState(null)
 
   useEffect(() => {
     const fetchPragueGuides = async () => {
@@ -188,7 +384,7 @@ export default function HowItWorks() {
             </div>
             <div className={styles.guidesGrid}>
               {pragueGuides.map((guide) => (
-                <Link to="/guides" key={guide.id} className={styles.guideCard}>
+                <div key={guide.id} className={styles.guideCard}>
                   <img 
                     src={guide.photoURL || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=500&fit=crop&crop=face'} 
                     alt={guide.name} 
@@ -197,8 +393,17 @@ export default function HowItWorks() {
                   <div className={styles.guideInfo}>
                     <h3 className={styles.guideName}>{guide.name}</h3>
                     <p className={styles.guideExperience}>{guide.experience}</p>
+                    <button 
+                      className={styles.viewItineraryBtn}
+                      onClick={() => {
+                        setSelectedGuide(guide)
+                        setShowDayTripsModal(true)
+                      }}
+                    >
+                      View 3-Day Trip
+                    </button>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
 
@@ -238,7 +443,7 @@ export default function HowItWorks() {
             </div>
             <div className={styles.guidesGrid}>
               {romeGuides.map((guide) => (
-                <Link to="/guides" key={guide.id} className={styles.guideCard}>
+                <div key={guide.id} className={styles.guideCard}>
                   <img 
                     src={guide.photoURL || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=500&fit=crop&crop=face'} 
                     alt={guide.name} 
@@ -247,13 +452,32 @@ export default function HowItWorks() {
                   <div className={styles.guideInfo}>
                     <h3 className={styles.guideName}>{guide.name}</h3>
                     <p className={styles.guideExperience}>{guide.experience}</p>
+                    <button 
+                      className={styles.viewItineraryBtn}
+                      onClick={() => {
+                        setSelectedGuide(guide)
+                        setShowDayTripsModal(true)
+                      }}
+                    >
+                      View 3-Day Trip
+                    </button>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           </div>
         )}
       </div>
+
+      {showDayTripsModal && (
+        <DayTripsModal 
+          guide={selectedGuide} 
+          onClose={() => {
+            setShowDayTripsModal(false)
+            setSelectedGuide(null)
+          }} 
+        />
+      )}
     </section>
   )
 }
