@@ -22,6 +22,7 @@ export default function App() {
             <Route path="/itinerario/praga" element={<PragueItinerary />} />
             <Route path="/partners" element={<Partners />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/:id" element={<Profile />} />
             <Route path="/guide/:id" element={<GuideProfile />} />
           </Routes>
         </div>

@@ -115,28 +115,50 @@ export default function GuideProfile() {
   const navigate = useNavigate()
   const [guideData, setGuideData] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [isOwner, setIsOwner] = useState(false)
+  const [loadAttempted, setLoadAttempted] = useState(false)
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/')
-      return
-    }
-    loadGuideData()
-  }, [user, id])
-
-  const loadGuideData = async () => {
+  const loadGuideData = async (guideId) => {
+    if (!guideId) return
+    
+    setLoading(true)
     try {
-      const guideRef = doc(db, 'guides', id)
+      let data = null
+      
+      const guideRef = doc(db, 'guides', guideId)
       const guideSnap = await getDoc(guideRef)
       if (guideSnap.exists()) {
-        setGuideData({ id: guideSnap.id, ...guideSnap.data() })
+        data = { id: guideSnap.id, ...guideSnap.data() }
+      } else {
+        const q = query(collection(db, 'guides'), where('userId', '==', guideId))
+        const snap = await getDocs(q)
+        if (!snap.empty) {
+          data = { id: snap.docs[0].id, ...snap.docs[0].data() }
+        }
+      }
+      
+      if (data) {
+        setGuideData(data)
+        setIsOwner(!!user && user.uid === data.userId)
+      } else {
+        setGuideData(null)
       }
     } catch (err) {
       console.error('Error loading guide data:', err)
+      setGuideData(null)
     } finally {
       setLoading(false)
+      setLoadAttempted(true)
     }
   }
+
+  useEffect(() => {
+    if (id && !loadAttempted) {
+      loadGuideData(id)
+    } else if (id && user) {
+      setIsOwner(guideData?.userId === user.uid)
+    }
+  }, [id, user, guideData?.userId])
 
   const handleLogout = async () => {
     try {
@@ -147,26 +169,19 @@ export default function GuideProfile() {
     }
   }
 
-  if (!user || loading) return null
+  if (loading) return null
 
-  if (!guideData || guideData.userId !== user.uid) {
+  if (!guideData) {
     return (
       <>
         <section className={styles.hero}>
           <nav className={styles.nav}>
             <Link to="/" className={styles.logo}>drifter<em>trip</em></Link>
-            <button onClick={handleLogout} className={styles.logoutBtn}>
-              <LogOut size={16} />
-              Sign out
-            </button>
           </nav>
         </section>
         <section className={styles.profile}>
           <div className="container">
-            <p>You don't have permission to view this guide profile.</p>
-            <Link to="/profile" className="primary" style={{ marginTop: '16px', display: 'inline-flex' }}>
-              Go to your profile
-            </Link>
+            <p>Guide not found</p>
           </div>
         </section>
         <Footer />
@@ -174,7 +189,15 @@ export default function GuideProfile() {
     )
   }
 
-  return <GuideEditor user={user} guideData={guideData} onLogout={handleLogout} />
+  if (!isOwner && user) {
+    return <GuidePublicProfile guide={guideData} />
+  }
+
+  if (isOwner && user) {
+    return <GuideEditor user={user} guideData={guideData} onLogout={handleLogout} />
+  }
+
+  return <GuidePublicProfile guide={guideData} />
 }
 
 function GuideEditor({ user, guideData, onLogout }) {
@@ -580,6 +603,113 @@ function GuideEditor({ user, guideData, onLogout }) {
           </div>
         </div>
       </section>
+
+      <Footer />
+    </>
+  )
+}
+
+function GuidePublicProfile({ guide }) {
+  const initial = guide?.name?.charAt(0) || '?'
+  
+  return (
+    <>
+      <section className={styles.hero}>
+        <nav className={styles.nav}>
+          <Link to="/" className={styles.logo}>drifter<em>trip</em></Link>
+        </nav>
+        <div className={styles.content}>
+          <p className="section-label">Local Guide</p>
+          <h1 className={styles.headline}>
+            {guide?.name}
+          </h1>
+          <p style={{ marginTop: '8px', color: 'var(--muted)' }}>
+            {guide?.city}, {guide?.country}
+          </p>
+        </div>
+      </section>
+
+      <section className={styles.profile}>
+        <div className={styles.profileInner}>
+          <div className={styles.userCard}>
+            {guide?.photoURL ? (
+              <img src={guide.photoURL} alt={guide.name} className={styles.avatar} />
+            ) : (
+              <div className={styles.avatarPlaceholder}>{initial}</div>
+            )}
+            <div className={styles.userInfo}>
+              <h3 className={styles.name}>{guide?.name}</h3>
+              <p className={styles.email}>{guide?.city}, {guide?.country}</p>
+              <span className={styles.guideBadge}>Local Guide</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {guide?.bio && (
+        <section className={styles.requests}>
+          <div className="container">
+            <h2 className="section-title" style={{ marginBottom: '16px' }}>
+              About <em>{guide.name?.split(' ')[0]}</em>
+            </h2>
+            <p style={{ lineHeight: 1.7 }}>{guide.bio}</p>
+          </div>
+        </section>
+      )}
+
+      {guide?.experience && (
+        <section className={styles.requests}>
+          <div className="container">
+            <h2 className="section-title" style={{ marginBottom: '16px' }}>
+              Experience
+            </h2>
+            <p style={{ lineHeight: 1.7 }}>{guide.experience}</p>
+          </div>
+        </section>
+      )}
+
+      {guide?.days?.length > 0 && (
+        <section className={styles.requests}>
+          <div className="container">
+            <h2 className="section-title" style={{ marginBottom: '32px' }}>
+              <em>Tours</em> & Experiences
+            </h2>
+            
+            {guide.days.map((day, idx) => (
+              <div key={idx} style={{ marginBottom: '32px' }}>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>
+                  Day {day.day}: {day.title}
+                </h3>
+                {day.intro && <p style={{ marginBottom: '16px', color: 'var(--muted)' }}>{day.intro}</p>}
+                
+                {day.sections?.map((section, sIdx) => (
+                  <div key={sIdx} style={{ marginBottom: '16px' }}>
+                    <p style={{ fontWeight: 600, marginBottom: '8px' }}>{section.time}</p>
+                    {section.spots?.filter(sp => sp.name).map((spot, pIdx) => (
+                      <div key={pIdx} style={{ 
+                        background: 'var(--card-bg)', 
+                        padding: '16px', 
+                        borderRadius: '8px',
+                        marginBottom: '8px' 
+                      }}>
+                        <p style={{ fontWeight: 600 }}>{spot.name}</p>
+                        {spot.description && <p style={{ color: 'var(--muted)', marginTop: '4px' }}>{spot.description}</p>}
+                        {spot.price && <p style={{ marginTop: '8px', fontWeight: 600 }}>€{spot.price}</p>}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+                
+                {day.budget && (
+                  <p style={{ marginTop: '16px', fontWeight: 600 }}>
+                    Estimated budget: €{day.budget}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <Footer />
     </>

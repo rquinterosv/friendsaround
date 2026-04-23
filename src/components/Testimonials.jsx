@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy } from 'firebase/firestore'
+import { collection, addDoc, getDocs, serverTimestamp } from 'firebase/firestore'
 import { db, loginWithGoogle } from '../firebase'
 import { useAuth } from '../contexts/AuthContext'
 import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react'
@@ -112,26 +112,14 @@ export default function Testimonials() {
   useEffect(() => {
     const fetchTestimonials = async () => {
       try {
-        const q = query(
-          collection(db, 'testimonials'),
-          where('approved', '==', true)
-        )
-        const snapshot = await getDocs(q)
-        const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        const snapshot = await getDocs(collection(db, 'testimonials'))
+        const items = snapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(item => item.approved === true || item.approved === undefined)
         items.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
         setTestimonials(items)
       } catch (err) {
         console.error('Error fetching testimonials:', err)
-        try {
-          const allSnap = await getDocs(collection(db, 'testimonials'))
-          const items = allSnap.docs
-            .map(doc => ({ id: doc.id, ...doc.data() }))
-            .filter(item => item.approved === true)
-            .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
-          setTestimonials(items)
-        } catch (fallbackErr) {
-          console.error('Fallback error:', fallbackErr)
-        }
       } finally {
         setCarouselLoading(false)
       }
@@ -160,9 +148,8 @@ export default function Testimonials() {
   }
 
   const handleCarouselClick = () => {
-    if (user && testimonials[currentIndex]?.userId === user.uid) {
-      navigate('/profile')
-    }
+    if (!testimonials[currentIndex]?.userId) return
+    navigate(`/profile/${testimonials[currentIndex].userId}`)
   }
 
   const update = (field) => (e) => setForm({ ...form, [field]: e.target.value })
@@ -236,7 +223,7 @@ export default function Testimonials() {
         {!carouselLoading && testimonials.length > 0 && !submitted && !open && (
           <div 
             className={styles.carousel}
-            onClick={user && testimonials[currentIndex]?.userId === user.uid ? handleCarouselClick : undefined}
+            onClick={testimonials[currentIndex]?.userId ? handleCarouselClick : undefined}
           >
             <button className={styles.carouselBtn} onClick={prevTestimonial} aria-label="Previous">
               <ChevronLeft size={24} />

@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { collection, query, where, getDocs, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 import { db, logout, uploadGuidePhoto } from '../firebase'
@@ -50,24 +50,35 @@ function createEmptyDay(dayNum) {
 export default function Profile() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { id: profileId } = useParams()
+  const [searchParams] = useSearchParams()
+  const viewUserId = profileId
   const [requests, setRequests] = useState([])
   const [testimonials, setTestimonials] = useState([])
   const [loading, setLoading] = useState(true)
+  const [viewAsUser, setViewAsUser] = useState(null)
+  const [isAlsoGuide, setIsAlsoGuide] = useState(null)
 
   useEffect(() => {
-    if (!user) {
+    if (!viewUserId && !user) {
       navigate('/')
       return
     }
-    loadData()
-  }, [user])
+    if (viewUserId) {
+      loadUserData()
+    } else if (user) {
+      loadData()
+    }
+  }, [user, viewUserId, navigate])
 
   const loadData = async () => {
+    const targetUserId = viewUserId || user.uid
+    
     try {
       const allReqSnap = await getDocs(collection(db, 'requests'))
       const reqItems = allReqSnap.docs
         .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(item => item.userId === user.uid)
+        .filter(item => item.userId === targetUserId)
         .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
       setRequests(reqItems)
     } catch (err) {
@@ -79,9 +90,68 @@ export default function Profile() {
       const allTestSnap = await getDocs(collection(db, 'testimonials'))
       const testItems = allTestSnap.docs
         .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(item => item.userId === user.uid)
+        .filter(item => item.userId === targetUserId)
         .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
       setTestimonials(testItems)
+    } catch (testErr) {
+      console.error('Error loading testimonials:', testErr)
+      setTestimonials([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loadUserData = async () => {
+    if (!viewUserId) {
+      loadData()
+      return
+    }
+
+    let userData = null
+
+    try {
+      const userDoc = await getDoc(doc(db, 'users', viewUserId))
+      if (userDoc.exists()) {
+        userData = { id: viewUserId, type: 'user', ...userDoc.data() }
+        setViewAsUser(userData)
+      }
+    } catch (err) {
+      console.log('User not in users collection')
+    }
+
+    try {
+      const guideQuery = query(collection(db, 'guides'), where('userId', '==', viewUserId))
+      const guideSnap = await getDocs(guideQuery)
+      if (!guideSnap.empty) {
+        const guideData = guideSnap.docs[0].data()
+        if (guideData.approved === true) {
+          setIsAlsoGuide({ id: guideSnap.docs[0].id, ...guideData })
+        }
+        if (!userData) {
+          userData = { id: guideSnap.docs[0].id, type: 'guide', ...guideData }
+          setViewAsUser(userData)
+        }
+      }
+    } catch (err) {
+      console.log('User not in guides collection')
+    }
+
+    try {
+      const allTestSnap = await getDocs(collection(db, 'testimonials'))
+      const testItems = allTestSnap.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(item => item.userId === viewUserId && item.approved === true)
+        .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
+      setTestimonials(testItems)
+      
+      if (!viewAsUser && testItems.length > 0) {
+        setViewAsUser({
+          displayName: testItems[0].name,
+          photoURL: testItems[0].userPhotoURL,
+          email: testItems[0].userEmail,
+          type: 'user'
+        })
+      }
     } catch (testErr) {
       console.error('Error loading testimonials:', testErr)
       setTestimonials([])
@@ -114,12 +184,16 @@ export default function Profile() {
     })
   }
 
-  if (!user) return null
+  if (!user && !viewUserId) return null
+
+  const isOwnProfile = !viewUserId && user
 
   const [isGuide, setIsGuide] = useState(false)
   const [guideData, setGuideData] = useState(null)
 
   useEffect(() => {
+    if (!isOwnProfile || !user) return
+    
     const checkGuide = async () => {
       try {
         const guideQuery = query(collection(db, 'guides'), where('userId', '==', user.uid))
@@ -133,7 +207,7 @@ export default function Profile() {
       }
     }
     checkGuide()
-  }, [user])
+  }, [user, isOwnProfile])
 
   if (isGuide && guideData) {
     return (
@@ -181,17 +255,14 @@ export default function Profile() {
       <section className={styles.hero}>
         <nav className={styles.nav}>
           <Link to="/" className={styles.logo}>drifter<em>trip</em></Link>
-          <button onClick={handleLogout} className={styles.logoutBtn}>
-            <LogOut size={16} />
-            Sign out
-          </button>
+          {viewUserId && <Link to="/profile" className={styles.logoutBtn}>Back to My Profile</Link>}
+          {!viewUserId && <button onClick={handleLogout} className={styles.logoutBtn}><LogOut size={16} />Sign out</button>}
         </nav>
 
         <div className={styles.content}>
-          <p className="section-label">Your profile</p>
+          <p className="section-label">User profile</p>
           <h1 className={styles.headline}>
-            Welcome back,<br />
-            <em>{user.displayName?.split(' ')[0] || 'traveler'}</em>
+            {viewAsUser?.displayName || 'Traveler'}'s profile
           </h1>
         </div>
       </section>
@@ -199,35 +270,44 @@ export default function Profile() {
       <section className={styles.profile}>
         <div className={styles.profileInner}>
           <div className={styles.userCard}>
-            {user.photoURL ? (
-              <img src={user.photoURL} alt={user.displayName} className={styles.avatar} />
+            {viewAsUser?.photoURL ? (
+              <img src={viewAsUser.photoURL} alt={viewAsUser.displayName} className={styles.avatar} />
             ) : (
               <div className={styles.avatarPlaceholder}>
-                {user.displayName?.charAt(0) || user.email.charAt(0).toUpperCase()}
+                {viewAsUser?.displayName?.charAt(0) || '?'}
               </div>
             )}
             <div className={styles.userInfo}>
-              <h3 className={styles.name}>{user.displayName || 'Traveler'}</h3>
-              <p className={styles.email}>{user.email}</p>
+              <h3 className={styles.name}>{viewAsUser?.displayName || 'Traveler'}</h3>
             </div>
           </div>
         </div>
       </section>
 
+      {isAlsoGuide && (
+        <section className={styles.requests}>
+          <div className="container">
+            <div className={styles.empty}>
+              <p style={{ marginBottom: '16px' }}>This traveler is also a local guide</p>
+              <Link to={`/guide/${isAlsoGuide.userId}`} className="primary" style={{ display: 'inline-flex' }}>
+                View guide profile →
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className={styles.requests}>
         <div className="container">
           <h2 className="section-title" style={{ marginBottom: '32px' }}>
-            Your <em>trips</em>
+            <em>Trips</em>
           </h2>
 
           {loading ? (
             <p className={styles.loading}>Loading...</p>
           ) : requests.length === 0 ? (
             <div className={styles.empty}>
-              <p>You haven't sent any trip requests yet.</p>
-              <Link to="/#signup" className={styles.ctaBtn}>
-                Plan your first trip
-              </Link>
+              <p>No trips found.</p>
             </div>
           ) : (
             <div className={styles.requestsList}>
@@ -261,17 +341,14 @@ export default function Profile() {
       <section className={styles.requests}>
         <div className="container">
           <h2 className="section-title" style={{ marginBottom: '32px' }}>
-            Your <em>reviews</em>
+            <em>Reviews</em>
           </h2>
 
           {loading ? (
             <p className={styles.loading}>Loading...</p>
           ) : testimonials.length === 0 ? (
             <div className={styles.empty}>
-              <p>You haven't shared any reviews yet.</p>
-              <Link to="/#testimonials" className={styles.ctaBtn}>
-                Write your first review
-              </Link>
+              <p>No reviews found.</p>
             </div>
           ) : (
             <div className={styles.testimonialsList}>
