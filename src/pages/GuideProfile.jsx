@@ -401,7 +401,7 @@ function GuideEditor({ user, guideData, onLogout }) {
                 </>
               )}
               <span className={styles.guideBadge}>Local Guide</span>
-              <Link to="/profile?as=user" className={styles.viewAsUserBtn}>
+              <Link to={`/profile/${user.uid}`} className={styles.viewAsUserBtn}>
                 View as User
               </Link>
             </div>
