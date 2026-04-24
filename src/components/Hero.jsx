@@ -197,7 +197,6 @@ export default function Hero() {
         <div className={styles.navLinks}>
           <Link to="/guides" className={styles.navLink}>Our Guides</Link>
           <Link to="/partners" className={styles.navLink}>Day trips</Link>
-          <Link to="/packages" className={styles.navBtn}>Packages</Link>
           {!user ? (
             <button type="button" className={styles.navBtnOutline} onClick={() => setShowLogin(true)}>
               <User size={16} />
@@ -251,7 +250,6 @@ export default function Hero() {
         <div className={styles.mobileMenu} role="dialog" aria-modal="true">
           <Link to="/guides" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Our Guides</Link>
           <Link to="/partners" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Day trips</Link>
-          <Link to="/packages" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Packages</Link>
           {!user ? (
             <button type="button" className={styles.mobileLinkBtn} onClick={() => { setMenuOpen(false); setShowLogin(true); }}>
               <User size={20} />

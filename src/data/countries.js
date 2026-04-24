@@ -62,3 +62,7 @@ export const countries = [
 export const countryMap = Object.fromEntries(
   countries.map(c => [c.code, c])
 );
+
+export function getFlagUrl(code) {
+  return `https://flagcdn.com/w40/${code.toLowerCase()}.png`;
+}

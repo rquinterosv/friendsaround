@@ -1,10 +1,10 @@
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { useState, useEffect } from 'react'
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore'
+import { useState, useEffect, useRef } from 'react'
+import { collection, query, where, getDocs, doc, getDoc, updateDoc, setDoc } from 'firebase/firestore'
 import { db, logout } from '../firebase'
 import { useAuth } from '../contexts/AuthContext'
-import { MapPin, Quote, LogOut } from 'lucide-react'
-import { countryMap } from '../data/countries'
+import { MapPin, Quote, LogOut, Edit, Save, X, Search, ChevronDown, User, Settings } from 'lucide-react'
+import { countries, countryMap, getFlagUrl } from '../data/countries'
 import Footer from '../components/Footer'
 import styles from './Profile.module.css'
 
@@ -34,24 +34,97 @@ const cityToCountry = {
   hungary: { country: 'hungary', flag: '🇭🇺' },
 }
 
-function CountryBadges({ codes = [], maxShow = 10 }) {
+function CountryBadges({ codes = [] }) {
   if (!codes || codes.length === 0) return null
-  const visible = codes.slice(0, maxShow)
-  const remaining = codes.length - maxShow
   return (
     <div className={styles.countryBadges}>
-      {visible.map(code => {
+      {codes.map(code => {
         const country = countryMap[code]
         return (
-          <span key={code} className={styles.countryBadge}>
-            <span>{country?.flag}</span>
-            <span>{country?.name || code}</span>
+          <span key={code} className={styles.countryBadge} title={country?.name || code}>
+            <img src={getFlagUrl(code)} alt={country?.name} className={styles.countryFlag} />
           </span>
         )
       })}
-      {remaining > 0 && (
-        <span className={styles.countryBadgeMore}>+{remaining} more</span>
-      )}
+    </div>
+  )
+}
+
+function CountrySelector({ selected = [], onChange }) {
+  const [search, setSearch] = useState('')
+  const [open, setOpen] = useState(false)
+
+  const filtered = countries.filter(c =>
+    c.name.toLowerCase().includes(search.toLowerCase()) ||
+    c.code.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const addCountry = (code) => {
+    if (!selected.includes(code)) {
+      onChange([...selected, code])
+    }
+    setSearch('')
+    setOpen(false)
+  }
+
+  const removeCountry = (code) => {
+    onChange(selected.filter(c => c !== code))
+  }
+
+  return (
+    <div className={styles.countrySelector}>
+      <div className={styles.countryTags}>
+        {selected.map(code => {
+          const country = countryMap[code]
+          return (
+            <span key={code} className={styles.countryTag}>
+              <img src={getFlagUrl(code)} alt={country?.name} className={styles.countryFlag} />
+              <span>{country?.name || code}</span>
+              <button onClick={() => removeCountry(code)} className={styles.countryTagRemove}>
+                <X size={12} />
+              </button>
+            </span>
+          )
+        })}
+      </div>
+      <div className={styles.countryDropdownWrapper}>
+        <button
+          type="button"
+          onClick={() => setOpen(!open)}
+          className={styles.countryDropdownToggle}
+        >
+          <Search size={14} />
+          <span>Add country...</span>
+          <ChevronDown size={14} />
+        </button>
+        {open && (
+          <div className={styles.countryDropdown}>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search countries..."
+              className={styles.countrySearch}
+              autoFocus
+            />
+            <div className={styles.countryList}>
+              {filtered.map(country => (
+                <button
+                  key={country.code}
+                  type="button"
+                  onClick={() => addCountry(country.code)}
+                  className={styles.countryOption}
+                  disabled={selected.includes(country.code)}
+                >
+                  <img src={getFlagUrl(country.code)} alt={country.name} className={styles.countryFlag} />
+                  <span>{country.name}</span>
+                  <span className={styles.countryCode}>{country.code}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -66,6 +139,31 @@ export default function Profile() {
   const [loading, setLoading] = useState(true)
   const [viewAsUser, setViewAsUser] = useState(null)
   const [isAlsoGuide, setIsAlsoGuide] = useState(null)
+  const [editing, setEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [editData, setEditData] = useState({ displayName: '', visited_countries: [] })
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const dropdownRef = useRef(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [menuOpen])
 
   useEffect(() => {
     if (authLoading) return
@@ -85,6 +183,18 @@ export default function Profile() {
     if (!targetUserId) {
       setLoading(false)
       return
+    }
+
+    try {
+      const userDoc = await getDoc(doc(db, 'users', targetUserId))
+      if (userDoc.exists()) {
+        setViewAsUser({ id: targetUserId, ...userDoc.data() })
+      } else {
+        setViewAsUser({ id: targetUserId, displayName: user?.displayName, photoURL: user?.photoURL })
+      }
+    } catch (err) {
+      console.log('User not in users collection')
+      setViewAsUser({ id: targetUserId, displayName: user?.displayName, photoURL: user?.photoURL })
     }
     
     try {
@@ -188,6 +298,35 @@ export default function Profile() {
     }
   }
 
+  const handleEdit = () => {
+    setEditData({
+      displayName: user?.displayName || viewAsUser?.displayName || '',
+      visited_countries: viewAsUser?.visited_countries || [],
+    })
+    setEditing(true)
+  }
+
+const handleSave = async () => {
+    setSaving(true)
+    try {
+      const userRef = doc(db, 'users', user.uid)
+      await setDoc(userRef, {
+        displayName: editData.displayName,
+        visited_countries: editData.visited_countries,
+      }, { merge: true })
+      setViewAsUser(prev => ({
+        ...prev,
+        displayName: editData.displayName,
+        visited_countries: editData.visited_countries,
+      }))
+      setEditing(false)
+    } catch (err) {
+      console.error('Error saving profile:', err)
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const formatDate = (timestamp) => {
     if (!timestamp) return ''
     return timestamp.toDate().toLocaleDateString('en-US', {
@@ -268,9 +407,82 @@ export default function Profile() {
       <section className={styles.hero}>
         <nav className={styles.nav}>
           <Link to="/" className={styles.logo}>drifter<em>trip</em></Link>
-          {viewUserId && isOwnProfile === false && <Link to="/profile" className={styles.logoutBtn}>Back to My Profile</Link>}
-          {!viewUserId && <button onClick={handleLogout} className={styles.logoutBtn}><LogOut size={16} />Sign out</button>}
+          <div className={styles.navLinks}>
+            <Link to="/guides" className={styles.navLink}>Our Guides</Link>
+            <Link to="/partners" className={styles.navLink}>Day trips</Link>
+            {!user ? (
+              <Link to="/" className={styles.navLink}>Sign in</Link>
+            ) : (
+              <div className={styles.dropdown} ref={dropdownRef}>
+                <button 
+                  type="button" 
+                  className={styles.dropdownToggle}
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                >
+                  <User size={16} />
+                  <span>{user.displayName?.split(' ')[0] || 'Account'}</span>
+                  <ChevronDown size={14} />
+                </button>
+                {dropdownOpen && (
+                  <div className={styles.dropdownMenu}>
+                    <Link to="/profile" className={styles.dropdownItem} onClick={() => setDropdownOpen(false)}>
+                      <User size={16} />
+                      My Profile
+                    </Link>
+                    <Link to="/profile" className={styles.dropdownItem} onClick={() => { setDropdownOpen(false); handleEdit(); }}>
+                      <Edit size={16} />
+                      Edit Profile
+                    </Link>
+                    <button className={styles.dropdownItem} onClick={handleLogout}>
+                      <LogOut size={16} />
+                      Sign out
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          <button
+            type="button"
+            className={`${styles.hamburger} ${menuOpen ? styles.hamburgerOpen : ''}`}
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={menuOpen}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
         </nav>
+
+        {menuOpen && (
+          <div className={styles.mobileMenu} role="dialog" aria-modal="true">
+            <Link to="/" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Home</Link>
+            <Link to="/guides" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Our Guides</Link>
+            <Link to="/partners" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Day trips</Link>
+            {!user ? (
+              <button type="button" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+                <User size={20} />
+                <span>Sign in</span>
+              </button>
+            ) : (
+              <>
+                <Link to="/profile" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+                  <User size={20} />
+                  <span>My Profile</span>
+                </Link>
+                <button className={styles.mobileLink} onClick={() => { setMenuOpen(false); handleEdit(); }}>
+                  <Edit size={20} />
+                  <span>Edit Profile</span>
+                </button>
+                <button className={styles.mobileLink} onClick={() => { handleLogout(); setMenuOpen(false); }}>
+                  <LogOut size={20} />
+                  <span>Sign out</span>
+                </button>
+              </>
+            )}
+          </div>
+        )}
 
         <div className={styles.content}>
           <p className="section-label">User profile</p>
@@ -291,8 +503,35 @@ export default function Profile() {
               </div>
             )}
             <div className={styles.userInfo}>
-              <h3 className={styles.name}>{user?.displayName || viewAsUser?.displayName || 'Traveler'}</h3>
-              <CountryBadges codes={viewAsUser?.visited_countries} />
+              {editing ? (
+                <>
+                  <div className={styles.editField}>
+                    <input
+                      type="text"
+                      value={editData.displayName}
+                      onChange={(e) => setEditData({ ...editData, displayName: e.target.value })}
+                      className={styles.nameInput}
+                      placeholder="Your name"
+                    />
+                    <button onClick={handleSave} className={styles.saveBtn} disabled={saving}>
+                      <Save size={14} />
+                      {saving ? '...' : 'Save'}
+                    </button>
+                  </div>
+                  <div className={styles.countrySection}>
+                    <label className={styles.countryLabel}>Countries I've visited</label>
+                    <CountrySelector
+                      selected={editData.visited_countries}
+                      onChange={(countries) => setEditData({ ...editData, visited_countries: countries })}
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h3 className={styles.name}>{user?.displayName || viewAsUser?.displayName || 'Traveler'}</h3>
+                  <CountryBadges codes={viewAsUser?.visited_countries} />
+                </>
+              )}
             </div>
           </div>
         </div>

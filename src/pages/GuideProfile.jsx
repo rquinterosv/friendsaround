@@ -4,7 +4,7 @@ import { collection, query, where, getDocs, doc, getDoc, updateDoc } from 'fireb
 import { db, logout, uploadGuidePhoto } from '../firebase'
 import { useAuth } from '../contexts/AuthContext'
 import { MapPin, Quote, Calendar, Settings, LogOut, Edit, TrendingUp, MessageSquare, Users, Map, Plus, X, Save, Upload, Trash2, Image, Search, ChevronDown } from 'lucide-react'
-import { countries, countryMap } from '../data/countries'
+import { countries, countryMap, getFlagUrl } from '../data/countries'
 import Footer from '../components/Footer'
 import styles from './Profile.module.css'
 
@@ -483,7 +483,7 @@ function GuideEditor({ user, guideData, onLogout }) {
                 </>
               )}
               <span className={styles.guideBadge}>Local Guide</span>
-              <Link to="/profile" className={styles.viewAsUserBtn}>
+              <Link to={`/profile/${user.uid}`} className={styles.viewAsUserBtn}>
                 View as User
               </Link>
             </div>
@@ -698,26 +698,19 @@ function GuideEditor({ user, guideData, onLogout }) {
   )
 }
 
-function CountryBadges({ codes = [], maxShow = 10 }) {
+function CountryBadges({ codes = [] }) {
   if (!codes || codes.length === 0) return null
-
-  const visible = codes.slice(0, maxShow)
-  const remaining = codes.length - maxShow
 
   return (
     <div className={styles.countryBadges}>
-      {visible.map(code => {
+      {codes.map(code => {
         const country = countryMap[code]
         return (
-          <span key={code} className={styles.countryBadge}>
-            <span>{country?.flag}</span>
-            <span>{country?.name || code}</span>
+          <span key={code} className={styles.countryBadge} title={country?.name || code}>
+            <img src={getFlagUrl(code)} alt={country?.name} className={styles.countryFlag} />
           </span>
         )
       })}
-      {remaining > 0 && (
-        <span className={styles.countryBadgeMore}>+{remaining} more</span>
-      )}
     </div>
   )
 }
