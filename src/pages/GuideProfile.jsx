@@ -3,9 +3,89 @@ import { useState, useEffect } from 'react'
 import { collection, query, where, getDocs, doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db, logout, uploadGuidePhoto } from '../firebase'
 import { useAuth } from '../contexts/AuthContext'
-import { MapPin, Quote, Calendar, Settings, LogOut, Edit, TrendingUp, MessageSquare, Users, Map, Plus, X, Save, Upload, Trash2, Image } from 'lucide-react'
+import { MapPin, Quote, Calendar, Settings, LogOut, Edit, TrendingUp, MessageSquare, Users, Map, Plus, X, Save, Upload, Trash2, Image, Search, ChevronDown } from 'lucide-react'
+import { countries, countryMap } from '../data/countries'
 import Footer from '../components/Footer'
 import styles from './Profile.module.css'
+
+function CountrySelector({ selected = [], onChange }) {
+  const [search, setSearch] = useState('')
+  const [open, setOpen] = useState(false)
+
+  const filtered = countries.filter(c =>
+    c.name.toLowerCase().includes(search.toLowerCase()) ||
+    c.code.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const addCountry = (code) => {
+    if (!selected.includes(code)) {
+      onChange([...selected, code])
+    }
+    setSearch('')
+    setOpen(false)
+  }
+
+  const removeCountry = (code) => {
+    onChange(selected.filter(c => c !== code))
+  }
+
+  return (
+    <div className={styles.countrySelector}>
+      <div className={styles.countryTags}>
+        {selected.map(code => {
+          const country = countryMap[code]
+          return (
+            <span key={code} className={styles.countryTag}>
+              <span>{country?.flag}</span>
+              <span>{country?.name || code}</span>
+              <button onClick={() => removeCountry(code)} className={styles.countryTagRemove}>
+                <X size={12} />
+              </button>
+            </span>
+          )
+        })}
+      </div>
+      <div className={styles.countryDropdownWrapper}>
+        <button
+          type="button"
+          onClick={() => setOpen(!open)}
+          className={styles.countryDropdownToggle}
+        >
+          <Search size={14} />
+          <span>Add country...</span>
+          <ChevronDown size={14} />
+        </button>
+        {open && (
+          <div className={styles.countryDropdown}>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search countries..."
+              className={styles.countrySearch}
+              autoFocus
+            />
+            <div className={styles.countryList}>
+              {filtered.map(country => (
+                <button
+                  key={country.code}
+                  type="button"
+                  onClick={() => addCountry(country.code)}
+                  className={styles.countryOption}
+                  disabled={selected.includes(country.code)}
+                >
+                  <span>{country.flag}</span>
+                  <span>{country.name}</span>
+                  <span className={styles.countryCode}>{country.code}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 function createEmptyDay(dayNum) {
   return {
@@ -209,6 +289,7 @@ function GuideEditor({ user, guideData, onLogout }) {
     city: guideData?.city || '',
     country: guideData?.country || '',
     days: guideData?.days || [],
+    visited_countries: guideData?.visited_countries || [],
     ...guideData,
   })
   const [editing, setEditing] = useState(false)
@@ -259,6 +340,7 @@ function GuideEditor({ user, guideData, onLogout }) {
         country: guide.country,
         days: guide.days,
         bio: guide.bio,
+        visited_countries: guide.visited_countries,
       })
       setEditing(false)
     } catch (err) {
@@ -401,7 +483,7 @@ function GuideEditor({ user, guideData, onLogout }) {
                 </>
               )}
               <span className={styles.guideBadge}>Local Guide</span>
-              <Link to="/profile?as=user" className={styles.viewAsUserBtn}>
+              <Link to="/profile" className={styles.viewAsUserBtn}>
                 View as User
               </Link>
             </div>
@@ -431,6 +513,13 @@ function GuideEditor({ user, guideData, onLogout }) {
                 className={styles.experienceTextarea}
                 rows={3}
               />
+              <div className={styles.countrySection}>
+                <label className={styles.countryLabel}>Countries I've visited</label>
+                <CountrySelector
+                  selected={guide.visited_countries || []}
+                  onChange={(countries) => updateGuideField('visited_countries', countries)}
+                />
+              </div>
             </div>
           ) : (
             <div className={styles.experienceDisplay}>
@@ -609,6 +698,30 @@ function GuideEditor({ user, guideData, onLogout }) {
   )
 }
 
+function CountryBadges({ codes = [], maxShow = 10 }) {
+  if (!codes || codes.length === 0) return null
+
+  const visible = codes.slice(0, maxShow)
+  const remaining = codes.length - maxShow
+
+  return (
+    <div className={styles.countryBadges}>
+      {visible.map(code => {
+        const country = countryMap[code]
+        return (
+          <span key={code} className={styles.countryBadge}>
+            <span>{country?.flag}</span>
+            <span>{country?.name || code}</span>
+          </span>
+        )
+      })}
+      {remaining > 0 && (
+        <span className={styles.countryBadgeMore}>+{remaining} more</span>
+      )}
+    </div>
+  )
+}
+
 function GuidePublicProfile({ guide }) {
   const initial = guide?.name?.charAt(0) || '?'
   
@@ -640,6 +753,7 @@ function GuidePublicProfile({ guide }) {
             <div className={styles.userInfo}>
               <h3 className={styles.name}>{guide?.name}</h3>
               <p className={styles.email}>{guide?.city}, {guide?.country}</p>
+              <CountryBadges codes={guide?.visited_countries} />
               <span className={styles.guideBadge}>Local Guide</span>
             </div>
           </div>
