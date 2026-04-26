@@ -7,7 +7,7 @@ const guides = [
     location: 'Prague · 🇨🇱',
     tags: ['Walking Tour', 'Day Trip', 'Morocco Week'],
     color: '#8B9E94',
-    image: 'https://images.unsplash.com/photo-1541849546-216549ae216d?w=1200&q=80&auto=format&fit=crop',
+    image: '/rafael.jpeg',
     link: '/guide-profile/rafael',
     active: true,
   },
