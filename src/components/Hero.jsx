@@ -136,24 +136,10 @@ function LoginPopup({ onClose, onShowTerms, onShowPrivacy }) {
   )
 }
 
-const cities = ['Prague', 'Rome']
 
-export default function Hero() {
+  export default function Hero() {
   const { user } = useAuth()
-  const [cityIndex, setCityIndex] = useState(0)
-  const [fading, setFading] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setFading(true)
-      setTimeout(() => {
-        setCityIndex(i => (i + 1) % cities.length)
-        setFading(false)
-      }, 400)
-    }, 2200)
-    return () => clearInterval(interval)
-  }, [])
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : ''
@@ -277,21 +263,20 @@ export default function Hero() {
       {showLogin && <LoginPopup onClose={() => setShowLogin(false)} onShowTerms={() => setShowTerms(true)} onShowPrivacy={() => setShowPrivacy(true)} />}
 
       <div className={styles.content}>
-        <p className="section-label">Experience it like a local</p>
 
         <h1 className={styles.headline}>
-          A local friend<br />
-          in <span className={`${styles.city} ${fading ? styles.fade : ''}`}>{cities[cityIndex]}</span>
+          Real trips.<br />
+          Real people.<br />
+          No bullshit.
         </h1>
 
         <p className={styles.sub}>
-          Weekend trips with a local who actually lives there.
-          No tour bus. No script. Just a real person showing you their city —
-          the bars, the neighborhoods, the nights out.
+          Travel experiences curated by locals who actually live there.
+          No tour buses. No scripts. Just real people showing you their city.
         </p>
 
         <div className={styles.actions}>
-          <button className="primary" onClick={scrollToSignup}>Join the waitlist</button>
+          <button className="primary" onClick={() => document.getElementById('guides-section')?.scrollIntoView({ behavior: 'smooth' })}>Browse experiences</button>
           <button className="secondary" onClick={() => document.getElementById('how')?.scrollIntoView({ behavior: 'smooth' })}>
             How it works
           </button>
