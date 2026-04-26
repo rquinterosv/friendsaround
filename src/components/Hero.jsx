@@ -265,9 +265,9 @@ function LoginPopup({ onClose, onShowTerms, onShowPrivacy }) {
       <div className={styles.content}>
 
         <h1 className={styles.headline}>
-          Real trips.<br />
-          Real people.<br />
-          No bullshit.
+          We are happy.<br />
+          We are friendly.<br />
+          We are <em>Drifters</em>.
         </h1>
 
         <p className={styles.sub}>

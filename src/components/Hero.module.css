@@ -194,6 +194,12 @@
   margin: 8px 0 28px;
 }
 
+.headline em {
+  font-style: italic;
+  font-family: var(--font-body);
+  font-weight: 600;
+}
+
 .city {
   color: var(--accent);
   font-style: italic;
