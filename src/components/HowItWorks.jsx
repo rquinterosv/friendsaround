@@ -4,62 +4,174 @@ import { collection, query, where, getDocs } from 'firebase/firestore'
 import { db } from '../firebase'
 import { ChevronLeft, ChevronRight, X, MapPin, Clock, Coffee, Sunset, Moon, Map, ExternalLink } from 'lucide-react'
 import styles from './HowItWorks.module.css'
+import TourDetailModal from './TourDetailModal'
 
 const steps = [
   {
     num: '01',
-    title: 'Pick your city',
-    desc: 'Choose between Prague or Rome. Each city has its own vibe — nightlife, culture, hidden gems, or all of the above.',
+    title: 'Pick your experience',
+    desc: 'Walking tour, day trip, or a full week abroad. You choose the format, we handle the rest.',
   },
   {
     num: '02',
-    title: 'Meet your local',
-    desc: "Every guide is verified and hand-picked. You see their profile, their story, and what kind of weekend they'll show you.",
+    title: 'We connect you with the right people',
+    desc: 'Every experience runs with someone who actually knows what they\'re doing — local guides, vetted partners, real operators.',
   },
   {
     num: '03',
-    title: 'Live like a local',
-    desc: 'No museum lines, no tour groups. Just you, your guide, and an actual weekend — coffee spots, bars, the places they never put on maps.',
+    title: 'You travel differently',
+    desc: 'No bus. No script. No itinerary that looks like everyone else\'s Instagram.',
   },
 ]
 
 const cities = [
   {
     name: 'Prague',
-    image: 'https://images.unsplash.com/photo-1541849546-216549ae216d?w=400&h=300&fit=crop',
+    image: '/images/prague-day-trip.jpg',
   },
   {
     name: 'Rome',
-    image: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400&h=300&fit=crop',
+    image: '/images/prague-day-trip.jpg',
+  },
+  {
+    name: 'Taghazout',
+    image: '/images/saxon-switzerland.jpg',
+  },
+  {
+    name: 'Dresden',
+    image: '/images/dresden-day-trip.jpg',
   },
 ]
 
 const pragueTours = [
   {
     id: 'bohemian',
-    name: 'Bohemian & Saxon Switzerland',
+    name: 'Bohemian and Saxon Switzerland',
     departure: 'From Prague',
-    duration: '10 hours',
-    price: '€152',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/5/5f/Pravcicka_brana_001.jpg',
-  },
-  {
-    id: 'narnia',
-    name: 'Narnia Tour',
-    departure: 'From Prague',
-    duration: '12 hours',
+    duration: 'Full day',
     price: '€140',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/3/3f/Tyssaerwaende2.jpg',
-  },
-  {
-    id: 'kutna',
-    name: 'Kutna Hora Bone Church',
-    departure: 'From Prague',
-    duration: '4 hours',
-    price: '€45',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Kostnicek3.jpg/1280px-Kostnicek3.jpg',
+    image: 'https://images.unsplash.com/photo-1559628231-87984f0477db?w=800&q=80&auto=format&fit=crop',
   },
 ]
+
+const toursData = {
+  pragueHiking: {
+    id: 'prague-hiking',
+    name: 'Full-Day Hiking from Prague',
+    category: 'Day trips',
+    price: '140',
+    duration: 'Full day — depart 6:45–7:30 AM, return 6–8 PM',
+    distance: '10–12 km',
+    difficulty: 'Moderate',
+    departure: 'From Prague',
+    image: '/images/prague-day-trip.jpg',
+    highlights: [
+      'Bastei Bridge — icon of Saxon Switzerland',
+      'Pravčická Arch — largest natural sandstone arch in Europe',
+      'Wild Gorge — serene boat ride through a hidden canyon',
+    ],
+    included: [
+      'Hotel pick-up & drop-off',
+      'National park entry fees',
+      'Round-trip transport in a comfortable van',
+      'Full à la carte lunch (vegetarian/vegan options available)',
+      'Professional guide (English, Spanish, or Czech)',
+    ],
+    toBring: [
+      'Valid passport or ID (crossing into Czech Republic)',
+      'Comfortable hiking shoes with good grip',
+      'Weather-appropriate clothing (layers recommended)',
+      'Water and snacks for the trail',
+    ],
+    goodToKnow: [
+      'Not suitable for children under 7 or those with limited mobility',
+      'Tour itinerary may vary due to weather',
+      'No drones allowed in the park',
+      'Pick-up details sent the evening before',
+    ],
+  },
+    taghazoutWeek: {
+    id: 'taghazout-week',
+    name: 'One Week in Morocco',
+    category: 'Week trip',
+    price: '600',
+    duration: '7 days',
+    departure: 'Agadir Airport',
+    image: '/images/taghazout-week.jpg',
+    itinerary: [
+      { day: 1, description: 'Arrival, welcome tea, sunset beach walk, Moroccan dinner' },
+      { day: 2, description: 'Surf lesson (2h) + free surfing (2h) + dinner' },
+      { day: 3, description: 'Paradise Valley trip (optional) + free surfing (2h) + dinner' },
+      { day: 4, description: 'Surf lesson (2h) + free surfing (2h) + dinner' },
+      { day: 5, description: 'Surf lesson (2h) + free surfing (2h) + cooking class (optional)' },
+      { day: 6, description: 'Surf lesson (2h) + free surfing (2h) + farewell dinner' },
+      { day: 7, description: 'Breakfast + airport drop-off' },
+    ],
+    included: [
+      'Airport transfers (Agadir)',
+      'Accommodation',
+      'Daily breakfast & dinners',
+      'Surf coaching (board & wetsuit included)',
+    ],
+    optionalExtras: [
+      { name: 'Sandboarding', price: '30' },
+      { name: 'Paradise Valley', price: '30' },
+      { name: 'Souk Al Ehad tour', price: '15' },
+      { name: 'Yoga', price: '12' },
+      { name: 'Quad', price: '20' },
+      { name: 'Horse riding', price: '20' },
+      { name: 'Camel riding', price: '20' },
+      { name: 'Jet ski 15min', price: '35' },
+      { name: 'Cooking class', price: '8' },
+    ],
+    goodToKnow: [
+      'Minimum group size: 4 people',
+      'Available September / October',
+      'Bookings confirmed in August',
+    ],
+  },
+  dresdenHiking: {
+    id: 'dresden-hiking',
+    name: 'Full-Day Hiking from Dresden',
+    category: 'Day trips',
+    price: '120',
+    duration: 'Full day — depart 7:45–8:20 AM, return 5:00–7:00 PM',
+    distance: '10–12 km',
+    difficulty: 'Moderate',
+    departure: 'From Dresden',
+    image: '/images/saxon-switzerland.jpg',
+    gallery: [
+      '/images/saxon-switzerland.jpg',
+      '/images/IMG_1146.JPEG',
+      '/images/IMG_7649.JPEG',
+      '/images/saxon.jpeg',
+    ],
+    highlights: [
+      'Bastei Bridge — iconic views over Elbe River',
+      'Lilienstein Mountain — dramatic rock formation',
+      'Königstein Fortress — historic hilltop citadel',
+    ],
+    included: [
+      'Hotel pick-up & drop-off',
+      'National park entry fees',
+      'Round-trip transport in a comfortable van',
+      'Full à la carte lunch (vegetarian/vegan options available)',
+      'Professional guide (English, German, or Czech)',
+    ],
+    toBring: [
+      'Valid passport or ID (crossing into Czech Republic)',
+      'Comfortable hiking shoes with good grip',
+      'Weather-appropriate clothing (layers recommended)',
+      'Water and snacks for the trail',
+    ],
+    goodToKnow: [
+      'Not suitable for children under 7 or those with limited mobility',
+      'Tour itinerary may vary due to weather',
+      'No drones allowed in the park',
+      'Pick-up details sent the evening before',
+    ],
+  },
+}
 
 function DayTripsModal({ guide, onClose }) {
   const guideName = guide?.name || 'Guide'
@@ -67,7 +179,7 @@ function DayTripsModal({ guide, onClose }) {
   const [currentDay, setCurrentDay] = useState(0)
   const [showMap, setShowMap] = useState(false)
 
-  const allSpots = itinerary.flatMap(day => 
+  const allSpots = itinerary.flatMap(day =>
     day.sections?.flatMap(s => s.spots?.filter(sp => sp.name) || []) || []
   )
 
@@ -101,12 +213,12 @@ function DayTripsModal({ guide, onClose }) {
           <span className="section-label">{guideName}'s Weekend</span>
           <h2 className={styles.modalTitle}>{itinerary.length}-Day Itinerary</h2>
         </div>
-        
+
         <div className={styles.carouselContainer}>
           <button className={styles.carouselBtn} onClick={prevDay} aria-label="Previous day">
             <ChevronLeft size={24} />
           </button>
-          
+
           <div className={styles.carouselSlide}>
             <div className={styles.dayContent}>
               <div className={styles.dayHeader}>
@@ -118,7 +230,7 @@ function DayTripsModal({ guide, onClose }) {
               {itinerary[currentDay].intro && (
                 <p className={styles.dayDescription}>{itinerary[currentDay].intro}</p>
               )}
-              
+
               {(() => {
                 const allSpots = itinerary[currentDay].sections?.flatMap(s => s.spots?.filter(sp => sp.name) || []) || []
                 const spotImages = allSpots.filter(sp => sp.image)
@@ -136,7 +248,7 @@ function DayTripsModal({ guide, onClose }) {
                 }
                 return null
               })()}
-              
+
               <div className={styles.activitiesList}>
                 {itinerary[currentDay].sections?.map((section, sectionIndex) => (
                   <div key={sectionIndex} className={styles.sectionBlock}>
@@ -156,12 +268,12 @@ function DayTripsModal({ guide, onClose }) {
               </div>
             </div>
           </div>
-          
+
           <button className={styles.carouselBtn} onClick={nextDay} aria-label="Next day">
             <ChevronRight size={24} />
           </button>
         </div>
-        
+
         <div className={styles.carouselDots}>
           {itinerary.map((_, i) => (
             <button
@@ -174,14 +286,14 @@ function DayTripsModal({ guide, onClose }) {
         </div>
 
         <div className={styles.mapSection}>
-          <button 
+          <button
             className={styles.mapButton}
             onClick={() => setShowMap(!showMap)}
           >
             <Map size={18} />
             {showMap ? 'Hide Map' : `View ${allSpots.length} Spots on Map`}
           </button>
-          
+
           {showMap && (
             <div className={styles.mapContainer}>
               <div className={styles.mapEmbed}>
@@ -211,17 +323,17 @@ function DayTripsModal({ guide, onClose }) {
                           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                             attribution: '&copy; OpenStreetMap contributors'
                           }).addTo(map);
-                          
+
                           var bounds = [];
                           var spots = ${JSON.stringify(allSpots.map(s => ({ name: s.name, description: s.description })))};
                           var defaultIcon = L.divIcon({ className: 'custom-icon', html: '📍', iconSize: [24, 24] });
-                          
+
                           spots.forEach(function(spot, i) {
                             var marker = L.marker([50.0755 + (Math.random() - 0.5) * 0.02, 14.4378 + (Math.random() - 0.5) * 0.02], { icon: defaultIcon }).addTo(map);
                             marker.bindPopup('<strong>' + spot.name + '</strong><br>' + (spot.description || ''));
                             bounds.push(marker.getLatLng());
                           });
-                          
+
                           if (bounds.length > 0) {
                             map.fitBounds(bounds, { padding: [50, 50] });
                           }
@@ -237,15 +349,6 @@ function DayTripsModal({ guide, onClose }) {
                   </div>
                 )}
               </div>
-              <a 
-                href={`https://www.google.com/maps/search/${allSpots.map(s => encodeURIComponent(s.name)).join('/')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.googleMapsLink}
-              >
-                <ExternalLink size={14} />
-                Open in Google Maps
-              </a>
             </div>
           )}
         </div>
@@ -258,10 +361,13 @@ export default function HowItWorks() {
   const [selectedCity, setSelectedCity] = useState(null)
   const [pragueGuides, setPragueGuides] = useState([])
   const [romeGuides, setRomeGuides] = useState([])
+  const [taghazoutGuides, setTaghazoutGuides] = useState([])
   const [loadingPragueGuides, setLoadingPragueGuides] = useState(true)
   const [loadingRomeGuides, setLoadingRomeGuides] = useState(true)
+  const [loadingTaghazoutGuides, setLoadingTaghazoutGuides] = useState(true)
   const [showDayTripsModal, setShowDayTripsModal] = useState(false)
   const [selectedGuide, setSelectedGuide] = useState(null)
+  const [selectedTour, setSelectedTour] = useState(null)
 
   useEffect(() => {
     const fetchPragueGuides = async () => {
@@ -292,8 +398,23 @@ export default function HowItWorks() {
         setLoadingRomeGuides(false)
       }
     }
+    const fetchTaghazoutGuides = async () => {
+      try {
+        const q = query(collection(db, 'guides'), where('approved', '==', true))
+        const snapshot = await getDocs(q)
+        const guides = snapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(g => g.country === 'Morocco')
+        setTaghazoutGuides(guides)
+      } catch (err) {
+        console.error('Error fetching Taghazout guides:', err)
+      } finally {
+        setLoadingTaghazoutGuides(false)
+      }
+    }
     fetchPragueGuides()
     fetchRomeGuides()
+    fetchTaghazoutGuides()
   }, [])
 
   const pragueEnabled = pragueGuides.length > 0
@@ -303,9 +424,9 @@ export default function HowItWorks() {
     <section id="how" className={styles.section}>
       <div className="container">
         <div className={styles.header}>
-          <p className="section-label">The experience</p>
+          <p className="section-label">How it works</p>
           <h2 className="section-title">
-            Three steps to a<br /><em>real trip</em>
+            Travel different.<br /><em>Here's how</em>
           </h2>
         </div>
 
@@ -326,8 +447,8 @@ export default function HowItWorks() {
             {cities.map((city, i) => (
               city.name === 'Rome' ? (
                 romeEnabled ? (
-                  <button 
-                    key={i} 
+                  <button
+                    key={i}
                     className={styles.cityThumb}
                     onClick={() => setSelectedCity(selectedCity === 'rome' ? null : 'rome')}
                   >
@@ -343,8 +464,8 @@ export default function HowItWorks() {
                 )
               ) : city.name === 'Prague' ? (
                 pragueEnabled ? (
-                  <button 
-                    key={i} 
+                  <button
+                    key={i}
                     className={styles.cityThumb}
                     onClick={() => setSelectedCity(selectedCity === 'prague' ? null : 'prague')}
                   >
@@ -358,6 +479,24 @@ export default function HowItWorks() {
                     <span className={styles.comingSoon}>Coming soon</span>
                   </div>
                 )
+              ) : city.name === 'Taghazout' ? (
+                <button
+                  key={i}
+                  className={styles.cityThumb}
+                  onClick={() => setSelectedCity(selectedCity === 'taghazout' ? null : 'taghazout')}
+                >
+                  <img src={city.image} alt={city.name} className={styles.cityImg} />
+                  <span className={styles.cityName}>{city.name}</span>
+                </button>
+              ) : city.name === 'Dresden' ? (
+                <button
+                  key={i}
+                  className={styles.cityThumb}
+                  onClick={() => setSelectedCity(selectedCity === 'dresden' ? null : 'dresden')}
+                >
+                  <img src={city.image} alt={city.name} className={styles.cityImg} />
+                  <span className={styles.cityName}>{city.name}</span>
+                </button>
               ) : null
             ))}
           </div>
@@ -375,15 +514,15 @@ export default function HowItWorks() {
             <div className={styles.guidesGrid}>
               {pragueGuides.map((guide) => (
                 <div key={guide.id} className={styles.guideCard}>
-                  <img 
-                    src={guide.photoURL || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=500&fit=crop&crop=face'} 
-                    alt={guide.name} 
-                    className={styles.guideImage} 
+                  <img
+                    src={guide.photoURL || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=500&fit=crop&crop=face'}
+                    alt={guide.name}
+                    className={styles.guideImage}
                   />
                   <div className={styles.guideInfo}>
                     <h3 className={styles.guideName}>{guide.name}</h3>
                     <p className={styles.guideExperience}>{guide.experience}</p>
-                    <button 
+                    <button
                       className={styles.viewItineraryBtn}
                       onClick={() => {
                         setSelectedGuide(guide)
@@ -400,11 +539,11 @@ export default function HowItWorks() {
             <div className={styles.sectionTitleWrap} style={{ marginTop: '64px' }}>
               <h3 className={styles.sectionTitleRow}>Day trips</h3>
             </div>
-            <div className={styles.toursGrid}>
-              {pragueTours.map((tour) => (
-                <Link to="/partners" key={tour.id} className={styles.tourCard}>
-                  <div className={styles.tourImageWrap}>
-                    <img src={tour.image} alt={tour.name} className={styles.tourImage} />
+              <div className={styles.toursGrid}>
+                {pragueTours.map((tour) => (
+                  <div key={tour.id} className={styles.tourCard} onClick={() => setSelectedTour(toursData.pragueHiking)}>
+                    <div className={styles.tourImageWrap}>
+                      <img src={tour.image} alt={tour.name} className={styles.tourImage} />
                     <span className={styles.tourDeparture}>{tour.departure}</span>
                   </div>
                   <div className={styles.tourBody}>
@@ -416,7 +555,7 @@ export default function HowItWorks() {
                       <span className={styles.tourPriceValue}>{tour.price}</span>
                     </div>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           </div>
@@ -434,15 +573,15 @@ export default function HowItWorks() {
             <div className={styles.guidesGrid}>
               {romeGuides.map((guide) => (
                 <div key={guide.id} className={styles.guideCard}>
-                  <img 
-                    src={guide.photoURL || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=500&fit=crop&crop=face'} 
-                    alt={guide.name} 
-                    className={styles.guideImage} 
+                  <img
+                    src={guide.photoURL || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=500&fit=crop&crop=face'}
+                    alt={guide.name}
+                    className={styles.guideImage}
                   />
                   <div className={styles.guideInfo}>
                     <h3 className={styles.guideName}>{guide.name}</h3>
                     <p className={styles.guideExperience}>{guide.experience}</p>
-                    <button 
+                    <button
                       className={styles.viewItineraryBtn}
                       onClick={() => {
                         setSelectedGuide(guide)
@@ -457,15 +596,80 @@ export default function HowItWorks() {
             </div>
           </div>
         )}
+
+        {selectedCity === 'taghazout' && (
+          <div className={styles.pragueContent}>
+            <div className={styles.contentHeader}>
+              <span className="section-label">Taghazout</span>
+            </div>
+
+            <div className={styles.sectionTitleWrap}>
+              <h3 className={styles.sectionTitleRow}>Week trip</h3>
+            </div>
+              <div className={styles.toursGrid}>
+                <div className={styles.tourCard} onClick={() => setSelectedTour(toursData.taghazoutWeek)}>
+                  <div className={styles.tourImageWrap}>
+                    <img src={toursData.taghazoutWeek.image} alt="Taghazout Week" className={styles.tourImage} />
+                  <span className={styles.tourDeparture}>Taghazout</span>
+                </div>
+                <div className={styles.tourBody}>
+                  <h3 className={styles.tourName}>One Week in Morocco</h3>
+                  <div className={styles.tourMeta}>
+                    <span className={styles.tourDetail}>7 days</span>
+                  </div>
+                  <div className={styles.tourPrice}>
+                    <span className={styles.tourPriceValue}>€600</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {selectedCity === 'dresden' && (
+          <div className={styles.pragueContent}>
+            <div className={styles.contentHeader}>
+              <span className="section-label">Dresden</span>
+            </div>
+
+            <div className={styles.sectionTitleWrap}>
+              <h3 className={styles.sectionTitleRow}>Day trips</h3>
+            </div>
+            <div className={styles.toursGrid}>
+              <div className={styles.tourCard} onClick={() => setSelectedTour(toursData.dresdenHiking)}>
+                <div className={styles.tourImageWrap}>
+                  <img src={toursData.dresdenHiking.image} alt="Dresden Day Trip" className={styles.tourImage} />
+                  <span className={styles.tourDeparture}>From Dresden</span>
+                </div>
+                <div className={styles.tourBody}>
+                  <h3 className={styles.tourName}>Full-Day Hiking from Dresden</h3>
+                  <div className={styles.tourMeta}>
+                    <span className={styles.tourDetail}>Full day</span>
+                  </div>
+                  <div className={styles.tourPrice}>
+                    <span className={styles.tourPriceValue}>€120</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {showDayTripsModal && (
-        <DayTripsModal 
-          guide={selectedGuide} 
+        <DayTripsModal
+          guide={selectedGuide}
           onClose={() => {
             setShowDayTripsModal(false)
             setSelectedGuide(null)
-          }} 
+          }}
+        />
+      )}
+
+      {selectedTour && (
+        <TourDetailModal
+          tour={selectedTour}
+          onClose={() => setSelectedTour(null)}
         />
       )}
     </section>

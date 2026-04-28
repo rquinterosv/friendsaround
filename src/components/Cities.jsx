@@ -1,19 +1,25 @@
 import { Link } from 'react-router-dom'
 import styles from './Cities.module.css'
 
-const guides = [
+const cities = [
   {
-    name: 'Rafael',
-    location: 'Prague · 🇨🇱',
-    tags: ['Walking Tour', 'Day Trip', 'Morocco Week'],
+    name: 'Prague',
+    country: 'Czech Republic',
+    tagline: "You've heard of it. You haven't seen it yet.",
     color: '#8B9E94',
-    image: '/rafael.jpeg',
+    image: 'https://images.unsplash.com/photo-1541849546-216549ae216d?w=1200&q=80&auto=format&fit=crop',
+    guide: {
+      name: 'Rafael',
+      flag: '🇨🇱',
+      tags: ['Walking Tour', 'Day Trip', 'Morocco Week'],
+    },
     link: '/guide-profile/rafael',
     active: true,
   },
   {
-    name: 'Coming soon',
-    location: 'Rome · Italy',
+    name: 'Rome',
+    country: 'Italy',
+    tagline: 'History, pasta & the side tourists never find.',
     color: '#6B6B6B',
     image: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=1200&q=80&auto=format&fit=crop',
     active: false,
@@ -26,46 +32,54 @@ export default function Cities() {
       <div className="container">
         <div className={styles.header}>
           <div>
-            <p className="section-label">Your local guides</p>
-            <h2 className="section-title">Real people.<br /><em>Real cities.</em> Hand-picked experiences.</h2>
+            <p className="section-label">Where we go</p>
+            <h2 className="section-title">Real people.<br /><em>Real cities.</em> Experiences worth telling.</h2>
           </div>
         </div>
 
         <div className={styles.grid}>
-          {guides.map((guide, i) => (
-            guide.active ? (
+          {cities.map((city, i) => (
+            city.active ? (
               <Link
                 key={i}
-                to={guide.link}
+                to={city.link}
                 className={styles.card}
-                style={{ '--city-color': guide.color }}
+                style={{ '--city-color': city.color }}
               >
                 <div
                   className={styles.cardBg}
-                  style={{ backgroundImage: `url(${guide.image})` }}
+                  style={{ backgroundImage: `url(${city.image})` }}
                 />
                 <div className={styles.cardBody}>
                   <div>
-                    <h3 className={styles.cityName}>{guide.name}</h3>
-                    <span className={styles.country}>{guide.location}</span>
+                    <h3 className={styles.cityName}>{city.name}</h3>
+                    <span className={styles.country}>{city.country}</span>
+                    <p className={styles.tag}>{city.tagline}</p>
                   </div>
-                  <p className={styles.tag}>{guide.tags.join(' · ')}</p>
+                  <div className={styles.guideInfo}>
+                    <span className={styles.guideName}>{city.guide.name} {city.guide.flag}</span>
+                    <span className={styles.guideTags}>{city.guide.tags.join(' · ')}</span>
+                  </div>
                 </div>
               </Link>
             ) : (
               <div
                 key={i}
                 className={styles.card}
-                style={{ '--city-color': guide.color }}
+                style={{ '--city-color': city.color }}
               >
                 <div
                   className={styles.cardBg}
-                  style={{ backgroundImage: `url(${guide.image})`, filter: 'grayscale(100%)' }}
+                  style={{ backgroundImage: `url(${city.image})`, filter: 'grayscale(100%)' }}
                 />
+                <div className={styles.cardOverlay}>
+                  <span className={styles.comingSoon}>Joining soon</span>
+                </div>
                 <div className={styles.cardBody}>
                   <div>
-                    <h3 className={styles.cityName}>{guide.name}</h3>
-                    <span className={styles.country}>{guide.location}</span>
+                    <h3 className={styles.cityName}>{city.name}</h3>
+                    <span className={styles.country}>{city.country}</span>
+                    <p className={styles.tag}>{city.tagline}</p>
                   </div>
                 </div>
               </div>
@@ -73,7 +87,7 @@ export default function Cities() {
           ))}
         </div>
 
-        <p className={styles.more}>More guides joining soon</p>
+        <p className={styles.more}>More cities coming soon</p>
       </div>
     </section>
   )

@@ -96,7 +96,7 @@ function LoginPopup({ onClose, onShowTerms, onShowPrivacy }) {
         <button type="button" className={styles.closeBtn} onClick={onClose}>×</button>
         <h3 className={styles.loginTitle}>Sign in to continue</h3>
         <p className={styles.loginSub}>Choose a sign-in method</p>
-        
+
         <label className={`${styles.termsCheckbox} ${showTermsError ? styles.termsCheckboxError : ''}`}>
           <input
             type="checkbox"
@@ -136,10 +136,24 @@ function LoginPopup({ onClose, onShowTerms, onShowPrivacy }) {
   )
 }
 
+const cities = ['Prague', 'Rome', 'Taghazout']
 
-  export default function Hero() {
+export default function Hero() {
   const { user } = useAuth()
+  const [cityIndex, setCityIndex] = useState(0)
+  const [fading, setFading] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFading(true)
+      setTimeout(() => {
+        setCityIndex(i => (i + 1) % cities.length)
+        setFading(false)
+      }, 400)
+    }, 2200)
+    return () => clearInterval(interval)
+  }, [])
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : ''
@@ -190,8 +204,8 @@ function LoginPopup({ onClose, onShowTerms, onShowPrivacy }) {
             </button>
           ) : (
             <div className={styles.dropdown} ref={dropdownRef}>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className={styles.dropdownToggle}
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
@@ -263,16 +277,15 @@ function LoginPopup({ onClose, onShowTerms, onShowPrivacy }) {
       {showLogin && <LoginPopup onClose={() => setShowLogin(false)} onShowTerms={() => setShowTerms(true)} onShowPrivacy={() => setShowPrivacy(true)} />}
 
       <div className={styles.content}>
+        <p className="section-label">Experience it like a local</p>
 
         <h1 className={styles.headline}>
-          We are happy.<br />
-          We are friendly.<br />
-          We are <em>Drifters</em>.
+          A local friend<br />
+          in <span className={`${styles.city} ${fading ? styles.fade : ''}`}>{cities[cityIndex]}</span>
         </h1>
 
         <p className={styles.sub}>
-          Travel experiences curated by locals who actually live there.
-          No tour buses. No scripts. Just real people showing you their city.
+          Ofrecemos un walking tour, un viaje fuera de la ciudad o estancias de una semana con recomendaciones de locales que tienen la experiencia real de viaje.
         </p>
 
         <div className={styles.actions}>
@@ -281,15 +294,6 @@ function LoginPopup({ onClose, onShowTerms, onShowPrivacy }) {
             How it works
           </button>
         </div>
-      </div>
-
-      <div className={styles.imageGrid}>
-        <Link to="/packages" className={`${styles.imgBox} ${styles.img1}`}>
-          <div className={styles.tag}>Prague, CZ</div>
-        </Link>
-        <Link to="/packages" className={`${styles.imgBox} ${styles.img2}`}>
-          <div className={styles.tag}>Rome, IT</div>
-        </Link>
       </div>
 
       {showTerms && <TermsModal onClose={() => setShowTerms(false)} />}
