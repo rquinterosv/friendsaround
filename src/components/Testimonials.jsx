@@ -223,6 +223,7 @@ export default function Testimonials() {
         {!carouselLoading && testimonials.length > 0 && !submitted && !open && (
           <div 
             className={styles.carousel}
+            onClick={testimonials[currentIndex]?.userId ? handleCarouselClick : undefined}
           >
             <button className={styles.carouselBtn} onClick={prevTestimonial} aria-label="Previous">
               <ChevronLeft size={24} />
