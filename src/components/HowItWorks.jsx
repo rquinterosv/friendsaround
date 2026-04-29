@@ -403,8 +403,15 @@ export default function HowItWorks() {
         const q = query(collection(db, 'guides'), where('approved', '==', true))
         const snapshot = await getDocs(q)
         const guides = snapshot.docs
+          .filter(doc => {
+            const data = doc.data()
+            const country = data.country || ''
+            return ['Morocco', 'Taghazout', 'MA'].includes(country) || 
+                   country.toLowerCase().includes('morocco') || 
+                   country.toLowerCase().includes('taghazout')
+          })
           .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(g => g.country === 'Morocco')
+        console.log('Taghazout guides found:', guides.length, guides.map(g => g.name))
         setTaghazoutGuides(guides)
       } catch (err) {
         console.error('Error fetching Taghazout guides:', err)
