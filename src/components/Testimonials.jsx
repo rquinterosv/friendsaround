@@ -148,8 +148,8 @@ export default function Testimonials() {
   }
 
   const handleCarouselClick = () => {
-    if (!testimonials[currentIndex]?.userId) return
-    navigate(`/profile/${testimonials[currentIndex].userId}`)
+    if (!testimonials[currentIndex]?.guideId) return
+    navigate(`/profile/${testimonials[currentIndex].guideId}`)
   }
 
   const update = (field) => (e) => setForm({ ...form, [field]: e.target.value })
@@ -223,7 +223,6 @@ export default function Testimonials() {
         {!carouselLoading && testimonials.length > 0 && !submitted && !open && (
           <div 
             className={styles.carousel}
-            onClick={testimonials[currentIndex]?.userId ? handleCarouselClick : undefined}
           >
             <button className={styles.carouselBtn} onClick={prevTestimonial} aria-label="Previous">
               <ChevronLeft size={24} />

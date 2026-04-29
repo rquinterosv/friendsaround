@@ -179,9 +179,12 @@ function DayTripsModal({ guide, onClose }) {
   const [currentDay, setCurrentDay] = useState(0)
   const [showMap, setShowMap] = useState(false)
 
-  const allSpots = itinerary.flatMap(day =>
-    day.sections?.flatMap(s => s.spots?.filter(sp => sp.name) || []) || []
-  )
+  const allSpots = itinerary[currentDay]?.sections?.flatMap(s => 
+    s.spots?.filter(sp => sp.name && sp.lat && sp.lng) || []
+  ) || []
+
+  // Only show map section if there are actual spots with coordinates
+  const hasSpotsWithCoords = allSpots.length > 0
 
   if (!itinerary || itinerary.length === 0) {
     return (
@@ -297,7 +300,7 @@ function DayTripsModal({ guide, onClose }) {
             {showMap ? 'Hide Map' : `View ${allSpots.length} Spots on Map`}
           </button>
 
-          {showMap && allSpots.length > 0 && (
+           {showMap && hasSpotsWithCoords && (
             <div className={styles.mapContainer}>
               <div className={styles.mapEmbed}>
                 {allSpots.length > 0 ? (
