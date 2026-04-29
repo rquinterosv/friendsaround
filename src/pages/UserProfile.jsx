@@ -1,29 +1,75 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore'
 import { db } from '../firebase'
-import { MapPin, MessageSquare } from 'lucide-react'
+import { getAuth, onAuthStateChanged } from 'firebase/auth'
+import { MapPin, MessageSquare, Calendar } from 'lucide-react'
 import { getFlagUrl } from '../data/countries'
 import Footer from '../components/Footer'
 import styles from './Profile.module.css'
 
 export default function UserProfile() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const [user, setUser] = useState(null)
   const [testimonials, setTestimonials] = useState([])
+  const [isAlsoGuide, setIsAlsoGuide] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
 
   useEffect(() => {
-    const fetchUserAndTestimonials = async () => {
+    const fetchUserData = async () => {
       try {
-        // Fetch user data from Firestore
+        // Try to get user from users collection
+        const userDoc = await getDoc(doc(db, 'users', id))
+        if (userDoc.exists()) {
+          setUser({ id: userDoc.id, ...userDoc.data() })
+        } else {
+          // Try to get user info from a testimonial (fallback)
+          const q = query(
+            collection(db, 'testimonials'),
+            where('userId', '==', id)
+          )
+          const snapshot = await getDocs(q)
+          if (!snapshot.empty) {
+            const data = snapshot.docs[0].data()
+            setUser({
+              id,
+              displayName: data.name,
+              photoURL: data.userPhotoURL,
+            })
+          } else {
+            // Try Firebase Auth (only works for current user)
+            const auth = getAuth()
+            onAuthStateChanged(auth, (authUser) => {
+              if (authUser && authUser.uid === id) {
+                setUser({
+                  id,
+                  displayName: authUser.displayName,
+                  photoURL: authUser.photoURL,
+                  email: authUser.email,
+                })
+              } else {
+                setNotFound(true)
+                setLoading(false)
+              }
+            })
+            return // Don't set loading false yet, wait for auth
+          }
+        }
+
+        // Check if user is also a guide
         try {
-          const userDoc = await getDoc(doc(db, 'users', id))
-          if (userDoc.exists()) {
-            setUser({ id: userDoc.id, ...userDoc.data() })
+          const guideQuery = query(
+            collection(db, 'guides'),
+            where('userId', '==', id)
+          )
+          const guideSnap = await getDocs(guideQuery)
+          if (!guideSnap.empty && guideSnap.docs[0].data().approved === true) {
+            setIsAlsoGuide({ id: guideSnap.docs[0].id, ...guideSnap.docs[0].data() })
           }
         } catch (err) {
-          console.log('No user doc found, using testimonial data')
+          console.log('Not a guide')
         }
 
         // Fetch testimonials by this user
@@ -40,13 +86,14 @@ export default function UserProfile() {
         setTestimonials(items)
       } catch (err) {
         console.error('Error fetching user profile:', err)
+        setNotFound(true)
       } finally {
         setLoading(false)
       }
     }
 
     if (id) {
-      fetchUserAndTestimonials()
+      fetchUserData()
     }
   }, [id])
 
@@ -60,20 +107,49 @@ export default function UserProfile() {
     )
   }
 
+  if (notFound || !user) {
+    return (
+      <div className={styles.profilePage}>
+        <div className="container">
+          <div className={styles.notFound}>
+            <h2>User not found</h2>
+            <p>This user doesn't exist or has been removed.</p>
+            <button className="primary" onClick={() => navigate('/')}>Go Home</button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className={styles.profilePage}>
       <div className="container">
         <div className={styles.header}>
           <div className={styles.avatar}>
             {user?.photoURL ? (
-              <img src={user.photoURL} alt={user?.name || 'User'} />
+              <img src={user.photoURL} alt={user?.displayName || 'User'} />
             ) : (
-              <span>{user?.name?.charAt(0) || '?'}</span>
+              <span>{user?.displayName?.charAt(0) || '?'}</span>
             )}
           </div>
-          <h1 className={styles.name}>{user?.name || 'Traveler'}</h1>
+          <h1 className={styles.name}>{user?.displayName || 'Traveler'}</h1>
           {user?.bio && <p className={styles.bio}>{user.bio}</p>}
+          {user?.createdAt && (
+            <p className={styles.memberSince}>
+              <Calendar size={14} />
+              Member since {new Date(user.createdAt.seconds * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
+            </p>
+          )}
         </div>
+
+        {isAlsoGuide && (
+          <div className={styles.alsoGuideBanner}>
+            <p>This traveler is also a local guide</p>
+            <Link to={`/guide/${isAlsoGuide.id}`} className="primary">
+              View guide profile →
+            </Link>
+          </div>
+        )}
 
         {user?.visited_countries && user.visited_countries.length > 0 && (
           <div className={styles.section}>
@@ -99,7 +175,7 @@ export default function UserProfile() {
           </h2>
           
           {testimonials.length === 0 ? (
-            <p className={styles.empty}>No reviews yet.</p>
+            <p className={styles.empty}>No stories shared yet.</p>
           ) : (
             <div className={styles.testimonialsList}>
               {testimonials.map(item => (

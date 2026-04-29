@@ -148,8 +148,9 @@ export default function Testimonials() {
   }
 
   const handleCarouselClick = () => {
-    if (!testimonials[currentIndex]?.guideId) return
-    navigate(`/profile/${testimonials[currentIndex].guideId}`)
+    const userId = testimonials[currentIndex]?.userId
+    if (!userId) return
+    navigate(`/user/${userId}`)
   }
 
   const update = (field) => (e) => setForm({ ...form, [field]: e.target.value })
