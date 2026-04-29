@@ -253,6 +253,9 @@ function DayTripsModal({ guide, onClose }) {
                 {itinerary[currentDay].sections?.map((section, sectionIndex) => (
                   <div key={sectionIndex} className={styles.sectionBlock}>
                     <span className={styles.sectionTime}>{section.time}</span>
+                    {section.description && (
+                      <p className={styles.sectionDescription}>{section.description}</p>
+                    )}
                     {section.spots?.filter(s => s.name).map((spot, spotIndex) => (
                       <div key={spotIndex} className={styles.activityItem}>
                         <MapPin size={14} className={styles.activityIcon} />
