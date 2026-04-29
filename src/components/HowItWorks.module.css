@@ -62,8 +62,47 @@
 
 .citiesRow {
   display: flex;
-  justify-content: center;
-  gap: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cityItem {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 200px;
+}
+
+.cityContentMobile {
+  display: none;
+}
+
+.desktopContent {
+  display: block;
+  margin-top: 64px;
+}
+
+@media (max-width: 768px) {
+  .citiesRow {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cityItem {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .cityContentMobile {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 16px;
+  }
+
+  .desktopContent {
+    display: none;
+  }
 }
 
 .cityThumb {
@@ -229,11 +268,25 @@
   overflow: hidden;
 }
 
-.tourImage {
+.sliderWrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.sliderImage {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+}
+
+.sliderActive {
+  opacity: 1;
 }
 
 .tourDeparture {
