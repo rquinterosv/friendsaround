@@ -256,11 +256,11 @@ function DayTripsModal({ guide, onClose }) {
                     {section.description && (
                       <p className={styles.sectionDescription}>{section.description}</p>
                     )}
-                    {section.spots?.filter(s => s.name).map((spot, spotIndex) => (
+                    {section.spots?.map((spot, spotIndex) => (
                       <div key={spotIndex} className={styles.activityItem}>
                         <MapPin size={14} className={styles.activityIcon} />
                         <div className={styles.spotContent}>
-                          <span className={styles.activityText}>{spot.name}</span>
+                          {spot.name && <span className={styles.activityText}>{spot.name}</span>}
                           {spot.description && <span className={styles.spotDesc}>{spot.description}</span>}
                           {spot.price && <span className={styles.spotPrice}>€{spot.price}</span>}
                         </div>
@@ -297,7 +297,7 @@ function DayTripsModal({ guide, onClose }) {
             {showMap ? 'Hide Map' : `View ${allSpots.length} Spots on Map`}
           </button>
 
-          {showMap && (
+          {showMap && allSpots.length > 0 && (
             <div className={styles.mapContainer}>
               <div className={styles.mapEmbed}>
                 {allSpots.length > 0 ? (
