@@ -179,6 +179,9 @@ function DayTripsModal({ guide, onClose }) {
   const [currentDay, setCurrentDay] = useState(0)
   const [showMap, setShowMap] = useState(false)
 
+  console.log('Guide:', guide?.name, 'Days:', guide?.days) // Debug
+  console.log('Itinerary:', itinerary) // Debug
+
   const allSpots = itinerary.flatMap(day =>
     day.sections?.flatMap(s => s.spots?.filter(sp => sp.name) || []) || []
   )
