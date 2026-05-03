@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     fs: {
-      allow: ['src', 'public']
+      allow: ['..']
     }
   },
   build: {
@@ -18,6 +18,3 @@ export default defineConfig({
     exclude: ['api']
   }
 })
-
-// Note: src/lib/api.js is both statically imported (by components) and dynamically imported (by firebase.js)
-// This is expected behavior - Vite warning about dynamic import is harmless
