@@ -40,34 +40,34 @@ async function seedData() {
     }
     
     // Insert or get Taghazout
-    let taghazoutResult = await client.query(`
+    const taghazoutInsert = await client.query(`
       INSERT INTO cities (name, country) 
       SELECT 'Taghazout', 'Morocco' 
       WHERE NOT EXISTS (SELECT 1 FROM cities WHERE name = 'Taghazout')
       RETURNING id
     `)
     
-    if (taghazoutResult.rows.length > 0) {
-      taghazoutId = taghazoutResult.rows[0].id
+    if (taghazoutInsert.rows.length > 0) {
+      taghazoutId = taghazoutInsert.rows[0].id
     } else {
-      taghazoutResult = await client.query(`SELECT id FROM cities WHERE name = 'Taghazout'`)
-      taghazoutId = taghazoutResult.rows[0].id
+      const taghazoutSelect = await client.query(`SELECT id FROM cities WHERE name = 'Taghazout'`)
+      taghazoutId = taghazoutSelect.rows[0].id
     }
     console.log('Taghazout ID:', taghazoutId)
     
     // Insert or get Dresden
-    let dresdenResult = await client.query(`
+    const dresdenInsert = await client.query(`
       INSERT INTO cities (name, country) 
       SELECT 'Dresden', 'Germany' 
       WHERE NOT EXISTS (SELECT 1 FROM cities WHERE name = 'Dresden')
       RETURNING id
     `)
     
-    if (dresdenResult.rows.length > 0) {
-      dresdenId = dresdenResult.rows[0].id
+    if (dresdenInsert.rows.length > 0) {
+      dresdenId = dresdenInsert.rows[0].id
     } else {
-      dresdenResult = await client.query(`SELECT id FROM cities WHERE name = 'Dresden'`)
-      dresdenId = dresdenResult.rows[0].id
+      const dresdenSelect = await client.query(`SELECT id FROM cities WHERE name = 'Dresden'`)
+      dresdenId = dresdenSelect.rows[0].id
     }
     console.log('Dresden ID:', dresdenId)
     
