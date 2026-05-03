@@ -1,13 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, X, MapPin, Clock, Coffee, Sunset, Moon, Map, ExternalLink } from 'lucide-react'
-import { getGuides } from '../lib/api'
+import { getCities, getGuides, getDayTrips, getWeekTrips } from '../lib/api'
 import styles from './HowItWorks.module.css'
 import TourDetailModal from './TourDetailModal'
-
-// Keep old Firestore import for reference - will be removed after full migration
-// import { collection, query, where, getDocs } from 'firebase/firestore'
-// import { db } from '../firebase'
 import taghazoutImg from '../assets/trips/tagazhout/IMG_7861.JPEG'
 import dresdenImg from '../assets/trips/dresden/IMG_7614.JPEG'
 import saxonImg1 from '../assets/trips/saxon/IMG_1146.JPEG'
@@ -540,6 +536,7 @@ function DresdenContent({ setSelectedTour }) {
 
 export default function HowItWorks() {
   const [selectedCity, setSelectedCity] = useState(null)
+  const [citiesData, setCitiesData] = useState([])
   const [pragueGuides, setPragueGuides] = useState([])
   const [romeGuides, setRomeGuides] = useState([])
   const [showDayTripsModal, setShowDayTripsModal] = useState(false)
@@ -547,36 +544,60 @@ export default function HowItWorks() {
   const [selectedTour, setSelectedTour] = useState(null)
 
   useEffect(() => {
-    const fetchPragueGuides = async () => {
+    const fetchData = async () => {
       try {
-        const q = query(collection(db, 'guides'), where('approved', '==', true))
-        const snapshot = await getDocs(q)
-        const guides = snapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(g => g.country === 'Czech Republic')
-        setPragueGuides(guides)
+        // Fetch cities with service counts
+        const citiesResult = await getCities()
+        if (citiesResult.success) {
+          setCitiesData(citiesResult.data)
+        }
+
+        // Fetch guides
+        const guidesResult = await getGuides()
+        if (guidesResult.success) {
+          const prague = guidesResult.data.filter(g => g.country === 'Czech Republic')
+          const rome = guidesResult.data.filter(g => g.country === 'Italy')
+          setPragueGuides(prague)
+          setRomeGuides(rome)
+        }
+
+        // Fetch day trips for cities
+        const dayTripsResult = await getDayTrips()
+        if (dayTripsResult.success) {
+          console.log('Day trips loaded:', dayTripsResult.data.length)
+        }
+
+        // Fetch week trips for cities
+        const weekTripsResult = await getWeekTrips()
+        if (weekTripsResult.success) {
+          console.log('Week trips loaded:', weekTripsResult.data.length)
+        }
       } catch (err) {
-        console.error('Error fetching Prague guides:', err)
+        console.error('Error fetching data:', err)
       }
     }
-    const fetchRomeGuides = async () => {
-      try {
-        const q = query(collection(db, 'guides'), where('approved', '==', true))
-        const snapshot = await getDocs(q)
-        const guides = snapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(g => g.country === 'Italy')
-        setRomeGuides(guides)
-      } catch (err) {
-        console.error('Error fetching Rome guides:', err)
-      }
-    }
-    fetchPragueGuides()
-    fetchRomeGuides()
+    fetchData()
   }, [])
 
-  const pragueEnabled = pragueGuides.length > 0
-  const romeEnabled = romeGuides.length > 0
+  // Check if city has active services
+  const getCityServices = (cityName) => {
+    const city = citiesData.find(c => c.name === cityName)
+    if (!city) return { hasServices: false, walk: 0, day: 0, week: 0 }
+    const walkCount = parseInt(city.walk_trips_count) || 0
+    const dayCount = parseInt(city.day_trips_count) || 0
+    const weekCount = parseInt(city.week_trips_count) || 0
+    return {
+      hasServices: walkCount > 0 || dayCount > 0 || weekCount > 0,
+      walk: walkCount,
+      day: dayCount,
+      week: weekCount
+    }
+  }
+
+  const pragueServices = getCityServices('Prague')
+  const romeServices = getCityServices('Rome')
+  const taghazoutServices = getCityServices('Taghazout')
+  const dresdenServices = getCityServices('Dresden')
 
   return (
     <section id="how" className={styles.section}>
@@ -605,13 +626,14 @@ export default function HowItWorks() {
             {cities.map((city, i) => {
               const cityKey = city.name.toLowerCase()
               const isSelected = selectedCity === cityKey
-              const isEnabled =
-                city.name === 'Rome' ? romeEnabled :
-                city.name === 'Prague' ? pragueEnabled : true
+              
+              // Get service counts for this city from API data
+              const services = getCityServices(city.name)
+              const isEnabled = services.hasServices
 
               const cityContent = isSelected && (
                 <div className={styles.cityContentMobile}>
-                  {city.name === 'Prague' && pragueEnabled && (
+                  {city.name === 'Prague' && pragueServices.hasServices && (
                     <PragueContent
                       pragueGuides={pragueGuides}
                       setSelectedGuide={setSelectedGuide}
@@ -619,17 +641,17 @@ export default function HowItWorks() {
                       setSelectedTour={setSelectedTour}
                     />
                   )}
-                  {city.name === 'Rome' && romeEnabled && (
+                  {city.name === 'Rome' && romeServices.hasServices && (
                     <RomeContent
                       romeGuides={romeGuides}
                       setSelectedGuide={setSelectedGuide}
                       setShowDayTripsModal={setShowDayTripsModal}
                     />
                   )}
-                  {city.name === 'Taghazout' && (
+                  {city.name === 'Taghazout' && taghazoutServices.hasServices && (
                     <TaghazoutContent setSelectedTour={setSelectedTour} />
                   )}
-                  {city.name === 'Dresden' && (
+                  {city.name === 'Dresden' && dresdenServices.hasServices && (
                     <DresdenContent setSelectedTour={setSelectedTour} />
                   )}
                 </div>
@@ -659,7 +681,7 @@ export default function HowItWorks() {
           </div>
 
           <div className={styles.desktopContent}>
-            {selectedCity === 'prague' && pragueEnabled && (
+            {selectedCity === 'prague' && pragueServices.hasServices && (
               <PragueContent
                 pragueGuides={pragueGuides}
                 setSelectedGuide={setSelectedGuide}
@@ -667,17 +689,17 @@ export default function HowItWorks() {
                 setSelectedTour={setSelectedTour}
               />
             )}
-            {selectedCity === 'rome' && romeEnabled && (
+            {selectedCity === 'rome' && romeServices.hasServices && (
               <RomeContent
                 romeGuides={romeGuides}
                 setSelectedGuide={setSelectedGuide}
                 setShowDayTripsModal={setShowDayTripsModal}
               />
             )}
-            {selectedCity === 'taghazout' && (
+            {selectedCity === 'taghazout' && taghazoutServices.hasServices && (
               <TaghazoutContent setSelectedTour={setSelectedTour} />
             )}
-            {selectedCity === 'dresden' && (
+            {selectedCity === 'dresden' && dresdenServices.hasServices && (
               <DresdenContent setSelectedTour={setSelectedTour} />
             )}
           </div>
