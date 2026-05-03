@@ -546,14 +546,16 @@ export default function HowItWorks() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const api = await loadApi()
+        
         // Fetch cities with service counts
-        const citiesResult = await getCities()
+        const citiesResult = await api.getCities()
         if (citiesResult.success) {
           setCitiesData(citiesResult.data)
         }
 
         // Fetch guides
-        const guidesResult = await getGuides()
+        const guidesResult = await api.getGuides()
         if (guidesResult.success) {
           const prague = guidesResult.data.filter(g => g.country === 'Czech Republic')
           const rome = guidesResult.data.filter(g => g.country === 'Italy')
@@ -562,13 +564,13 @@ export default function HowItWorks() {
         }
 
         // Fetch day trips for cities
-        const dayTripsResult = await getDayTrips()
+        const dayTripsResult = await api.getDayTrips()
         if (dayTripsResult.success) {
           console.log('Day trips loaded:', dayTripsResult.data.length)
         }
 
         // Fetch week trips for cities
-        const weekTripsResult = await getWeekTrips()
+        const weekTripsResult = await api.getWeekTrips()
         if (weekTripsResult.success) {
           console.log('Week trips loaded:', weekTripsResult.data.length)
         }

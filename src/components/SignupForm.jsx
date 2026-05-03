@@ -1,8 +1,16 @@
 import { useState } from 'react'
 import { loginWithGoogle, logout } from '../firebase'
 import { useAuth } from '../contexts/AuthContext'
-import { createBooking } from '../lib/api'
 import styles from './SignupForm.module.css'
+
+// Dynamic import to avoid Vite bundling issues
+let apiModule = null
+const loadApi = async () => {
+  if (!apiModule) {
+    apiModule = await import('../lib/api')
+  }
+  return apiModule
+}
 
 const today = new Date().toISOString().split('T')[0]
 
@@ -140,7 +148,8 @@ export default function SignupForm() {
     setError('')
 
     try {
-      const result = await createBooking({
+      const api = await loadApi()
+      const result = await api.createBooking({
         trip_type: 'day', // Default to day trip for now
         trip_id: form.destination?.toLowerCase() || '',
         group_size: form.groupSize,

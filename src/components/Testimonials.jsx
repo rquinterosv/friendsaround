@@ -3,8 +3,16 @@ import { useNavigate } from 'react-router-dom'
 import { loginWithGoogle } from '../firebase'
 import { useAuth } from '../contexts/AuthContext'
 import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react'
-import { getReviews, createReview } from '../lib/api'
 import styles from './Testimonials.module.css'
+
+// Dynamic import to avoid Vite bundling issues
+let apiModule = null
+const loadApi = async () => {
+  if (!apiModule) {
+    apiModule = await import('../lib/api')
+  }
+  return apiModule
+}
 
 // Keep old Firestore import for reference - will be removed after full migration
 // import { collection, addDoc, getDocs, serverTimestamp } from 'firebase/firestore'
