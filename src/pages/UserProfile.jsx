@@ -1,12 +1,16 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { collection, query, where, getDocs, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
-import { db, logout, uploadGuidePhoto } from '../firebase'
+import { logout } from '../firebase'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { MapPin, MessageSquare, Calendar, User, Edit, Save, LogOut, X, Search, ChevronDown, Upload } from 'lucide-react'
 import { countries, countryMap, getFlagUrl } from '../data/countries'
+import { getUser, updateUser, uploadAvatar, getGuide, getReviews } from '../lib/api'
 import Footer from '../components/Footer'
 import styles from './Profile.module.css'
+
+// Keep old Firestore import for reference - will be removed after full migration
+// import { collection, query, where, getDocs, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
+// import { db, uploadGuidePhoto } from '../firebase'
 
 function CountryBadges({ codes = [] }) {
   if (!codes || codes.length === 0) return null
@@ -149,61 +153,55 @@ export default function UserProfile() {
           }
         })
 
-        // Try to get user from users collection
-        const userDoc = await getDoc(doc(db, 'users', id))
         let userData = null
         
-        if (userDoc.exists()) {
-          userData = { id, ...userDoc.data(), type: 'user' }
-          setUser(userData)
-        } else {
-          // Try to get user info from a testimonial (fallback)
-          const q = query(
-            collection(db, 'testimonials'),
-            where('userId', '==', id)
-          )
-          const snapshot = await getDocs(q)
-          if (!snapshot.empty) {
-            const data = snapshot.docs[0].data()
-            userData = {
-              id,
-              displayName: data.name,
-              photoURL: data.userPhotoURL,
-              email: data.userEmail,
-              type: 'user'
-            }
+        // Try to get user from API
+        try {
+          const userResult = await getUser(id)
+          if (userResult.success && userResult.data) {
+            userData = { id, ...userResult.data, type: 'user' }
             setUser(userData)
           }
+        } catch (err) {
+          console.log('User not in users collection')
         }
 
         // Check if user is also a guide
         try {
-          const guideQuery = query(
-            collection(db, 'guides'),
-            where('userId', '==', id)
-          )
-          const guideSnap = await getDocs(guideQuery)
-          if (!guideSnap.empty && guideSnap.docs[0].data().approved === true) {
-            setIsAlsoGuide({ id: guideSnap.docs[0].id, ...guideSnap.docs[0].data() })
+          const { getGuide } = await import('../lib/api.js')
+          const guideResult = await getGuide(id)
+          if (guideResult.success && guideResult.data) {
+            setIsAlsoGuide(guideResult.data)
           }
         } catch (err) {
           console.log('Not a guide')
         }
 
-        // Fetch testimonials by this user
-        const q2 = query(
-          collection(db, 'testimonials'),
-          where('userId', '==', id)
-        )
-        const snapshot2 = await getDocs(q2)
-        const items = snapshot2.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(item => item.approved === true || item.approved === undefined)
-          .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
-        
-        setTestimonials(items)
+        // Fetch reviews by this user
+        try {
+          const reviewResult = await getReviews()
+          if (reviewResult.success) {
+            const items = reviewResult.data
+              .filter(item => item.user_id === id)
+            setTestimonials(items)
+            
+            if (!userData && items.length > 0) {
+              userData = {
+                id,
+                displayName: items[0].full_name,
+                photoURL: items[0].avatar_url,
+                email: items[0].email,
+                type: 'user'
+              }
+              setUser(userData)
+            }
+          }
+        } catch (err) {
+          console.error('Error fetching reviews:', err)
+          setTestimonials([])
+        }
 
-        if (!userData && items.length === 0) {
+        if (!userData && testimonials.length === 0) {
           setNotFound(true)
         }
       } catch (err) {
@@ -239,17 +237,18 @@ export default function UserProfile() {
   const handleSave = async () => {
     setSaving(true)
     try {
-      const userRef = doc(db, 'users', id)
-      await setDoc(userRef, {
-        displayName: editData.displayName,
+      const result = await updateUser(id, {
+        full_name: editData.displayName,
         visited_countries: editData.visited_countries,
-      }, { merge: true })
+      })
       
-      setUser(prev => ({
-        ...prev,
-        displayName: editData.displayName,
-        visited_countries: editData.visited_countries,
-      }))
+      if (result.success) {
+        setUser(prev => ({
+          ...prev,
+          full_name: editData.displayName,
+          visited_countries: editData.visited_countries,
+        }))
+      }
       setEditing(false)
     } catch (err) {
       console.error('Error saving profile:', err)

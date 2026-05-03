@@ -1,12 +1,16 @@
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { collection, query, where, getDocs, doc, getDoc, updateDoc } from 'firebase/firestore'
-import { db, logout, uploadGuidePhoto } from '../firebase'
 import { useAuth } from '../contexts/AuthContext'
+import { logout } from '../firebase'
+import { getGuide, updateGuide, uploadAvatar, uploadTripImage } from '../lib/api'
 import { MapPin, Quote, Calendar, Settings, LogOut, Edit, TrendingUp, MessageSquare, Users, Map, Plus, X, Save, Upload, Trash2, Image, Search, ChevronDown } from 'lucide-react'
 import { countries, countryMap, getFlagUrl } from '../data/countries'
 import Footer from '../components/Footer'
 import styles from './Profile.module.css'
+
+// Keep old Firestore import for reference - will be removed after full migration
+// import { collection, query, where, getDocs, doc, getDoc, updateDoc } from 'firebase/firestore'
+// import { db, uploadGuidePhoto } from '../firebase'
 
 function CountrySelector({ selected = [], onChange }) {
   const [search, setSearch] = useState('')
@@ -203,23 +207,11 @@ export default function GuideProfile() {
     
     setLoading(true)
     try {
-      let data = null
+      const result = await getGuide(guideId)
       
-      const guideRef = doc(db, 'guides', guideId)
-      const guideSnap = await getDoc(guideRef)
-      if (guideSnap.exists()) {
-        data = { id: guideSnap.id, ...guideSnap.data() }
-      } else {
-        const q = query(collection(db, 'guides'), where('userId', '==', guideId))
-        const snap = await getDocs(q)
-        if (!snap.empty) {
-          data = { id: snap.docs[0].id, ...snap.docs[0].data() }
-        }
-      }
-      
-      if (data) {
-        setGuideData(data)
-        setIsOwner(!!user && user.uid === data.userId)
+      if (result.success && result.data) {
+        setGuideData(result.data)
+        setIsOwner(!!user && user.uid === result.data.user_id)
       } else {
         setGuideData(null)
       }
@@ -318,8 +310,10 @@ function GuideEditor({ user, guideData, onLogout }) {
     setUploading(true)
     
     try {
-      const url = await uploadGuidePhoto(user.uid, file)
-      setGuide({ ...guide, photoURL: url })
+      const result = await uploadAvatar(user.uid, file)
+      if (result.success) {
+        setGuide({ ...guide, avatar_url: result.data.avatar_url })
+      }
     } catch (err) {
       console.error('Error uploading photo:', err)
       alert(`Error uploading photo: ${err.message}`)
@@ -331,18 +325,13 @@ function GuideEditor({ user, guideData, onLogout }) {
   const handleSave = async () => {
     setSaving(true)
     try {
-      const guideRef = doc(db, 'guides', guide.id)
-      await updateDoc(guideRef, {
-        name: guide.name,
-        experience: guide.experience,
-        photoURL: guide.photoURL,
-        city: guide.city,
-        country: guide.country,
-        days: guide.days,
+      const result = await updateGuide(guide.id, {
         bio: guide.bio,
-        visited_countries: guide.visited_countries,
       })
-      setEditing(false)
+      
+      if (result.success) {
+        setEditing(false)
+      }
     } catch (err) {
       console.error('Error saving guide:', err)
     } finally {

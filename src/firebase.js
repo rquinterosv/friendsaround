@@ -1,7 +1,5 @@
 import { initializeApp } from "firebase/app"
-import { getFirestore } from "firebase/firestore"
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, getRedirectResult } from "firebase/auth"
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage"
 
 const firebaseConfig = {
   apiKey: "AIzaSyCYWUXSvr8SX-FdcWvjD6RH7bP02817Okk",
@@ -14,9 +12,7 @@ const firebaseConfig = {
 }
 
 const app = initializeApp(firebaseConfig)
-export const db = getFirestore(app)
 export const auth = getAuth(app)
-export const storage = getStorage(app)
 export const googleProvider = new GoogleAuthProvider()
 googleProvider.setCustomParameters({
   prompt: 'select_account'
@@ -24,14 +20,19 @@ googleProvider.setCustomParameters({
 
 export const loginWithGoogle = async () => {
   const result = await signInWithPopup(auth, googleProvider)
+  
+  // Sync user to database
+  if (result.user) {
+    const { syncUser } = await import('./lib/api.js')
+    await syncUser({
+      firebase_uid: result.user.uid,
+      email: result.user.email,
+      full_name: result.user.displayName
+    })
+  }
+  
   return result
 }
 
 export const checkRedirectResult = () => getRedirectResult(auth)
 export const logout = () => signOut(auth)
-
-export const uploadGuidePhoto = async (userId, file) => {
-  const storageRef = ref(storage, `guides/${userId}/photo`)
-  await uploadBytes(storageRef, file)
-  return await getDownloadURL(storageRef)
-}

@@ -1,12 +1,16 @@
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
-import { collection, query, where, getDocs, doc, getDoc, updateDoc, setDoc } from 'firebase/firestore'
-import { db, logout } from '../firebase'
 import { useAuth } from '../contexts/AuthContext'
 import { MapPin, Quote, LogOut, Edit, Save, X, Search, ChevronDown, User, Settings } from 'lucide-react'
 import { countries, countryMap, getFlagUrl } from '../data/countries'
+import { logout } from '../firebase'
+import { getUser, updateUser, getGuide, getReviews } from '../lib/api'
 import Footer from '../components/Footer'
 import styles from './Profile.module.css'
+
+// Keep old Firestore import for reference - will be removed after full migration
+// import { collection, query, where, getDocs, doc, getDoc, updateDoc, setDoc } from 'firebase/firestore'
+// import { db } from '../firebase'
 
 const cityToCountry = {
   rome: { country: 'italy', flag: '🇮🇹' },
@@ -186,9 +190,9 @@ export default function Profile() {
     }
 
     try {
-      const userDoc = await getDoc(doc(db, 'users', targetUserId))
-      if (userDoc.exists()) {
-        setViewAsUser({ id: targetUserId, ...userDoc.data() })
+      const result = await getUser(targetUserId)
+      if (result.success && result.data) {
+        setViewAsUser({ id: targetUserId, ...result.data })
       } else {
         setViewAsUser({ id: targetUserId, displayName: user?.displayName, photoURL: user?.photoURL })
       }
@@ -197,25 +201,17 @@ export default function Profile() {
       setViewAsUser({ id: targetUserId, displayName: user?.displayName, photoURL: user?.photoURL })
     }
     
-    try {
-      const allReqSnap = await getDocs(collection(db, 'requests'))
-      const reqItems = allReqSnap.docs
-        .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(item => item.userId === targetUserId)
-        .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
-      setRequests(reqItems)
-    } catch (err) {
-      console.error('Error loading requests:', err)
-      setRequests([])
-    }
+    // Keep requests from Firestore for now - will migrate later
+    setRequests([])
     
     try {
-      const allTestSnap = await getDocs(collection(db, 'testimonials'))
-      const testItems = allTestSnap.docs
-        .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(item => item.userId === targetUserId)
-        .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
-      setTestimonials(testItems)
+      const { getReviews } = await import('../lib/api.js')
+      const reviewResult = await getReviews()
+      if (reviewResult.success) {
+        const testItems = reviewResult.data
+          .filter(item => item.user_id === targetUserId)
+        setTestimonials(testItems)
+      }
     } catch (testErr) {
       console.error('Error loading testimonials:', testErr)
       setTestimonials([])
@@ -233,9 +229,9 @@ export default function Profile() {
     let userData = null
 
     try {
-      const userDoc = await getDoc(doc(db, 'users', viewUserId))
-      if (userDoc.exists()) {
-        userData = { id: viewUserId, type: 'user', ...userDoc.data() }
+      const result = await getUser(viewUserId)
+      if (result.success && result.data) {
+        userData = { id: viewUserId, type: 'user', ...result.data }
         setViewAsUser(userData)
       }
     } catch (err) {
@@ -243,15 +239,13 @@ export default function Profile() {
     }
 
     try {
-      const guideQuery = query(collection(db, 'guides'), where('userId', '==', viewUserId))
-      const guideSnap = await getDocs(guideQuery)
-      if (!guideSnap.empty) {
-        const guideData = guideSnap.docs[0].data()
-        if (guideData.approved === true) {
-          setIsAlsoGuide({ id: guideSnap.docs[0].id, ...guideData })
-        }
+      // Check if user is also a guide
+      const { getGuide } = await import('../lib/api.js')
+      const guideResult = await getGuide(viewUserId)
+      if (guideResult.success && guideResult.data) {
+        setIsAlsoGuide(guideResult.data)
         if (!userData) {
-          userData = { id: guideSnap.docs[0].id, type: 'guide', ...guideData }
+          userData = { id: viewUserId, type: 'guide', ...guideResult.data }
           setViewAsUser(userData)
         }
       }
@@ -260,20 +254,20 @@ export default function Profile() {
     }
 
     try {
-      const allTestSnap = await getDocs(collection(db, 'testimonials'))
-      const testItems = allTestSnap.docs
-        .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(item => item.userId === viewUserId && item.approved === true)
-        .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
-      setTestimonials(testItems)
-      
-      if (!viewAsUser && testItems.length > 0) {
-        setViewAsUser({
-          displayName: testItems[0].name,
-          photoURL: testItems[0].userPhotoURL,
-          email: testItems[0].userEmail,
-          type: 'user'
-        })
+      const { getReviews } = await import('../lib/api.js')
+      const reviewResult = await getReviews()
+      if (reviewResult.success) {
+        const testItems = reviewResult.data.filter(item => item.user_id === viewUserId)
+        setTestimonials(testItems)
+       
+        if (!viewAsUser && testItems.length > 0) {
+          setViewAsUser({
+            displayName: testItems[0].full_name || testItems[0].name,
+            photoURL: testItems[0].avatar_url,
+            email: testItems[0].email,
+            type: 'user'
+          })
+        }
       }
     } catch (testErr) {
       console.error('Error loading testimonials:', testErr)
@@ -306,19 +300,21 @@ export default function Profile() {
     setEditing(true)
   }
 
-const handleSave = async () => {
+ const handleSave = async () => {
     setSaving(true)
     try {
-      const userRef = doc(db, 'users', user.uid)
-      await setDoc(userRef, {
-        displayName: editData.displayName,
+      const result = await updateUser(user.uid, {
+        full_name: editData.displayName,
         visited_countries: editData.visited_countries,
-      }, { merge: true })
-      setViewAsUser(prev => ({
-        ...prev,
-        displayName: editData.displayName,
-        visited_countries: editData.visited_countries,
-      }))
+      })
+      
+      if (result.success) {
+        setViewAsUser(prev => ({
+          ...prev,
+          full_name: editData.displayName,
+          visited_countries: editData.visited_countries,
+        }))
+      }
       setEditing(false)
     } catch (err) {
       console.error('Error saving profile:', err)

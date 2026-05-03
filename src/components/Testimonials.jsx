@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { collection, addDoc, getDocs, serverTimestamp } from 'firebase/firestore'
-import { db, loginWithGoogle } from '../firebase'
+import { loginWithGoogle } from '../firebase'
 import { useAuth } from '../contexts/AuthContext'
 import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react'
+import { getReviews, createReview } from '../lib/api'
 import styles from './Testimonials.module.css'
+
+// Keep old Firestore import for reference - will be removed after full migration
+// import { collection, addDoc, getDocs, serverTimestamp } from 'firebase/firestore'
+// import { db } from '../firebase'
 
 const cityToCountry = {
   rome: { country: 'italy', flag: '🇮🇹' },
@@ -178,22 +182,19 @@ export default function Testimonials() {
     setLoading(true)
     setError('')
     try {
-      const photos = form.photos.filter(p => p.trim() !== '')
-      await addDoc(collection(db, 'testimonials'), {
-        name: user?.displayName || form.name,
-        trip: form.trip,
-        quote: form.quote,
-        email: user?.email || form.email,
-        userId: user?.uid,
-        userEmail: user?.email,
-        photos: photos,
-        approved: false,
-        createdAt: serverTimestamp(),
+      const result = await createReview({
+        content: form.quote,
+        city: form.trip,
       })
-      setSubmitted(true)
+      
+      if (result.success) {
+        setSubmitted(true)
+      } else {
+        setError(result.error || 'Something went wrong')
+      }
     } catch (err) {
-      console.error('Firestore error:', err)
-      setError(`Something went wrong: ${err?.code || err?.message || 'unknown error'}`)
+      console.error('API error:', err)
+      setError(`Something went wrong: ${err?.message || 'unknown error'}`)
     } finally {
       setLoading(false)
     }

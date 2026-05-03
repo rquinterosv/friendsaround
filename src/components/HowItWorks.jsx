@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { collection, query, where, getDocs } from 'firebase/firestore'
-import { db } from '../firebase'
 import { ChevronLeft, ChevronRight, X, MapPin, Clock, Coffee, Sunset, Moon, Map, ExternalLink } from 'lucide-react'
+import { getGuides } from '../lib/api'
 import styles from './HowItWorks.module.css'
 import TourDetailModal from './TourDetailModal'
+
+// Keep old Firestore import for reference - will be removed after full migration
+// import { collection, query, where, getDocs } from 'firebase/firestore'
+// import { db } from '../firebase'
 import taghazoutImg from '../assets/trips/tagazhout/IMG_7861.JPEG'
 import dresdenImg from '../assets/trips/dresden/IMG_7614.JPEG'
 import saxonImg1 from '../assets/trips/saxon/IMG_1146.JPEG'

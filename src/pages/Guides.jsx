@@ -1,10 +1,14 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
-import { db, loginWithGoogle } from '../firebase'
 import { useAuth } from '../contexts/AuthContext'
+import { loginWithGoogle } from '../firebase'
+import { submitGuideApplication, getCities } from '../lib/api'
 import Footer from '../components/Footer'
 import styles from './Guides.module.css'
+
+// Keep old Firestore import for reference - will be removed after full migration
+// import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
+// import { db } from '../firebase'
 
 const guides = [
   {

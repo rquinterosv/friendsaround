@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
-import { db, loginWithGoogle, logout } from '../firebase'
+import { loginWithGoogle, logout } from '../firebase'
 import { useAuth } from '../contexts/AuthContext'
+import { createBooking } from '../lib/api'
 import styles from './SignupForm.module.css'
 
 const today = new Date().toISOString().split('T')[0]
@@ -140,18 +140,21 @@ export default function SignupForm() {
     setError('')
 
     try {
-      await addDoc(collection(db, 'requests'), {
-        ...form,
-        userId: user.uid,
-        userName: user.displayName,
-        userEmail: user.email,
-        userPhotoURL: user.photoURL,
-        createdAt: serverTimestamp(),
+      const result = await createBooking({
+        trip_type: 'day', // Default to day trip for now
+        trip_id: form.destination?.toLowerCase() || '',
+        group_size: form.groupSize,
+        notes: `Package: ${form.package}, Arrival: ${form.arrivalDate}, Departure: ${form.departureDate}, Phone: ${form.phone}`,
       })
-      setSubmitted(true)
+
+      if (result.success) {
+        setSubmitted(true)
+      } else {
+        setError(result.error || 'Something went wrong')
+      }
     } catch (err) {
-      console.error('Firestore error:', err)
-      setError(`Something went wrong: ${err?.code || err?.message || 'unknown error'}`)
+      console.error('API error:', err)
+      setError(`Something went wrong: ${err?.message || 'unknown error'}`)
     } finally {
       setLoading(false)
     }
