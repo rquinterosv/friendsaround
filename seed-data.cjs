@@ -3,11 +3,15 @@
 // Seed data script for Drifter Trip
 // Run: node seed-data.cjs
 
-require('dotenv').config({ path: '.env' })
+require('dotenv').config({ path: require('path').resolve(__dirname, '.env') })
 const { Pool } = require('pg')
 
+const COCKROACHDB_URL = process.env.COCKROACHDB_URL
+
+console.log('COCKROACHDB_URL:', COCKROACHDB_URL ? 'Found (length: ' + COCKROACHDB_URL.length + ')' : 'NOT FOUND')
+
 const pool = new Pool({
-  connectionString: process.env.COOCKROACHDB_URL,
+  connectionString: COCKROACHDB_URL,
   ssl: {
     rejectUnauthorized: false
   }
@@ -19,44 +23,52 @@ async function seedData() {
   try {
     console.log('Starting data seed...')
     
-    // Get existing cities (Prague and Rome should already exist)
-    const citiesResult = await client.query('SELECT * FROM cities')
-    console.log('Existing cities:', citiesResult.rows)
-    
     let pragueId, romeId, taghazoutId, dresdenId
     
-    // Find Prague
-    const prague = citiesResult.rows.find(c => c.name === 'Prague')
-    if (prague) {
-      pragueId = prague.id
+    // Get or create Prague
+    let pragueResult = await client.query(`SELECT id FROM cities WHERE name = 'Prague'`)
+    if (pragueResult.rows.length > 0) {
+      pragueId = pragueResult.rows[0].id
       console.log('Found Prague:', pragueId)
     }
     
-    // Find Rome
-    const rome = citiesResult.rows.find(c => c.name === 'Rome')
-    if (rome) {
-      romeId = rome.id
+    // Get or create Rome
+    let romeResult = await client.query(`SELECT id FROM cities WHERE name = 'Rome'`)
+    if (romeResult.rows.length > 0) {
+      romeId = romeResult.rows[0].id
       console.log('Found Rome:', romeId)
     }
     
-    // Insert Taghazout
-    const taghazoutResult = await client.query(`
+    // Insert or get Taghazout
+    let taghazoutResult = await client.query(`
       INSERT INTO cities (name, country) 
-      VALUES ('Taghazout', 'Morocco') 
-      ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name 
+      SELECT 'Taghazout', 'Morocco' 
+      WHERE NOT EXISTS (SELECT 1 FROM cities WHERE name = 'Taghazout')
       RETURNING id
     `)
-    taghazoutId = taghazoutResult.rows[0].id
+    
+    if (taghazoutResult.rows.length > 0) {
+      taghazoutId = taghazoutResult.rows[0].id
+    } else {
+      taghazoutResult = await client.query(`SELECT id FROM cities WHERE name = 'Taghazout'`)
+      taghazoutId = taghazoutResult.rows[0].id
+    }
     console.log('Taghazout ID:', taghazoutId)
     
-    // Insert Dresden
-    const dresdenResult = await client.query(`
+    // Insert or get Dresden
+    let dresdenResult = await client.query(`
       INSERT INTO cities (name, country) 
-      VALUES ('Dresden', 'Germany') 
-      ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name 
+      SELECT 'Dresden', 'Germany' 
+      WHERE NOT EXISTS (SELECT 1 FROM cities WHERE name = 'Dresden')
       RETURNING id
     `)
-    dresdenId = dresdenResult.rows[0].id
+    
+    if (dresdenResult.rows.length > 0) {
+      dresdenId = dresdenResult.rows[0].id
+    } else {
+      dresdenResult = await client.query(`SELECT id FROM cities WHERE name = 'Dresden'`)
+      dresdenId = dresdenResult.rows[0].id
+    }
     console.log('Dresden ID:', dresdenId)
     
     // Insert Day Trip for Prague
@@ -81,34 +93,38 @@ async function seedData() {
           'form',
           true
         )
-        ON CONFLICT (title) DO NOTHING
+        RETURNING id
       `, [pragueId])
       console.log('✓ Prague day trip inserted')
     }
     
     // Insert Day Trip for Dresden
     if (dresdenId) {
-      await client.query(`
-        INSERT INTO day_trips (
-          city_id, title, description, price, duration, difficulty, 
-          departure_city, highlights, included, what_to_bring, good_to_know,
-          booking_type, active
-        ) VALUES (
-          $1, 
-          'Full-Day Hiking Adventure in Bohemian and Saxon Switzerland',
-          130.00,
-          'Full day',
-          'Moderate',
-          'Dresden',
-          ARRAY['Bastei Bridge', 'Pravčická Arch', 'Wild Gorge boat ride'],
-          ARRAY['Hotel pick-up & drop-off', 'National park entry fees', 'Round-trip transport', 'Full lunch', 'Professional guide'],
-          ARRAY['Valid passport or ID', 'Hiking shoes', 'Weather-appropriate clothing', 'Water and snacks'],
-          ARRAY['Not suitable for children under 7', 'Tour may vary due to weather', 'No drones allowed', 'Pick-up details sent evening before'],
-          'form',
-          true
-        )
-        ON CONFLICT (title) DO NOTHING
-      `, [dresdenId])
+      // Check if already exists
+      const existing = await client.query(`SELECT id FROM day_trips WHERE title = 'Full-Day Hiking Adventure in Bohemian and Saxon Switzerland'`)
+      if (existing.rows.length === 0) {
+        await client.query(`
+          INSERT INTO day_trips (
+            city_id, title, description, price, duration, difficulty, 
+            departure_city, highlights, included, what_to_bring, good_to_know,
+            booking_type, active
+          ) VALUES (
+            $1, 
+            'Full-Day Hiking Adventure in Bohemian and Saxon Switzerland',
+            'Explore the stunning landscapes of Bohemian and Saxon Switzerland on this unforgettable hiking adventure from Dresden.',
+            130.00,
+            'Full day',
+            'Moderate',
+            'Dresden',
+            ARRAY['Bastei Bridge', 'Pravčická Arch', 'Wild Gorge boat ride'],
+            ARRAY['Hotel pick-up & drop-off', 'National park entry fees', 'Round-trip transport', 'Full lunch', 'Professional guide'],
+            ARRAY['Valid passport or ID', 'Hiking shoes', 'Weather-appropriate clothing', 'Water and snacks'],
+            ARRAY['Not suitable for children under 7', 'Tour may vary due to weather', 'No drones allowed', 'Pick-up details sent evening before'],
+            'form',
+            true
+          )
+        `, [dresdenId])
+      }
       console.log('✓ Dresden day trip inserted')
     }
     
@@ -140,7 +156,7 @@ async function seedData() {
           8,
           true
         )
-        ON CONFLICT (title) DO NOTHING
+        RETURNING id
       `, [taghazoutId, JSON.stringify(itinerary)])
       console.log('✓ Taghazout week trip inserted')
     }
