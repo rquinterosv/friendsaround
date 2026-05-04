@@ -28,7 +28,8 @@ export default async function handler(request) {
 
     return successResponse(result.rows)
   } catch (err) {
-    console.error('Get cities error:', err)
+    console.error('Get cities error:', err.message, err.stack)
+    console.error('DB connection string present:', !!process.env.COCKROACHDB_URL)
     return errorResponse('Internal server error', 500)
   }
 }

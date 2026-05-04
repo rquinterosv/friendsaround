@@ -1,7 +1,9 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import styles from './Cities.module.css'
+import api from '../lib/api'
 
-const cities = [
+const fallbackCities = [
   {
     name: 'Prague',
     country: 'Czech Republic',
@@ -14,7 +16,6 @@ const cities = [
       tags: ['Walking Tour', 'Day Trip', 'Morocco Week'],
     },
     link: '/guide-profile/rafael',
-    active: true,
   },
   {
     name: 'Rome',
@@ -22,11 +23,26 @@ const cities = [
     tagline: 'History, pasta & the side tourists never find.',
     color: '#6B6B6B',
     image: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=1200&q=80&auto=format&fit=crop',
-    active: false,
   },
 ]
 
 export default function Cities() {
+  const [cities, setCities] = useState(null)
+
+  useEffect(() => {
+    api.getCities()
+      .then(res => {
+        if (res.success && res.data.length > 0) {
+          setCities(res.data)
+        } else {
+          setCities(fallbackCities)
+        }
+      })
+      .catch(() => setCities(fallbackCities))
+  }, [])
+
+  if (!cities) return null
+
   return (
     <section className={styles.section} id="guides-section">
       <div className="container">
@@ -39,7 +55,7 @@ export default function Cities() {
 
         <div className={styles.grid}>
           {cities.map((city, i) => (
-            city.active ? (
+            city.link ? (
               <Link
                 key={i}
                 to={city.link}
@@ -56,10 +72,12 @@ export default function Cities() {
                     <span className={styles.country}>{city.country}</span>
                     <p className={styles.tag}>{city.tagline}</p>
                   </div>
-                  <div className={styles.guideInfo}>
-                    <span className={styles.guideName}>{city.guide.name} {city.guide.flag}</span>
-                    <span className={styles.guideTags}>{city.guide.tags.join(' · ')}</span>
-                  </div>
+                  {city.guide && (
+                    <div className={styles.guideInfo}>
+                      <span className={styles.guideName}>{city.guide.name} {city.guide.flag}</span>
+                      <span className={styles.guideTags}>{city.guide.tags.join(' · ')}</span>
+                    </div>
+                  )}
                 </div>
               </Link>
             ) : (
@@ -70,11 +88,8 @@ export default function Cities() {
               >
                 <div
                   className={styles.cardBg}
-                  style={{ backgroundImage: `url(${city.image})`, filter: 'grayscale(100%)' }}
+                  style={{ backgroundImage: `url(${city.image})` }}
                 />
-                <div className={styles.cardOverlay}>
-                  <span className={styles.comingSoon}>Joining soon</span>
-                </div>
                 <div className={styles.cardBody}>
                   <div>
                     <h3 className={styles.cityName}>{city.name}</h3>
