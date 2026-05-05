@@ -54,8 +54,8 @@ function errorResponse(message, status = 400) {
 
 // Router function
 async function handler(request) {
-const url = new URL(request.url, `https://${request.headers.host}`)  const pathname = url.pathname
-  const method = request.method
+const url = new URL(request.url, `https://${request.headers.get('host')}`)
+const pathname = url.pathname  const method = request.method
 
   // Parse route parameters
   let match
