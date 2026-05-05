@@ -591,11 +591,10 @@ export default function HowItWorks() {
   // Check if city has active services
   const getCityServices = (cityName) => {
     const city = citiesData.find(c => c.name === cityName)
-    // If citiesData is empty (API hasn't loaded yet), assume cities are active
+    // If city not found in API response, assume it's active by default
     if (!city) {
-      console.log(`City ${cityName} not found in citiesData, returning hasServices: ${citiesData.length === 0}`)
       return { 
-        hasServices: citiesData.length === 0, // fallback: treat as active if API hasn't loaded
+        hasServices: true,
         walk: 0, 
         day: 0, 
         week: 0 
@@ -647,7 +646,8 @@ export default function HowItWorks() {
               
               // Get service counts for this city from API data
               const services = getCityServices(city.name)
-              const isEnabled = services.hasServices
+              // Only show "Coming soon" if API has loaded AND city truly has no services
+              const isEnabled = citiesData.length === 0 || services.hasServices
 
               const cityContent = isSelected && (
                 <div className={styles.cityContentMobile}>
