@@ -1,6 +1,6 @@
-import { query, getClient } from '../lib/db.mjs'
-import cloudinary from '../lib/cloudinary.mjs'
-import { verifyToken } from '../lib/firebase-admin.mjs'
+const { query, getClient } = require('../lib/db.js')
+const cloudinary = require('../lib/cloudinary.js')
+const { verifyToken } = require('../lib/firebase-admin.js')
 
 // Helper to verify auth token from request
 async function withAuth(request) {
@@ -53,7 +53,7 @@ function errorResponse(message, status = 400) {
 }
 
 // Router function
-export default async function handler(request) {
+async function handler(request) {
 const url = new URL(request.url, `https://${request.headers.host}`)  const pathname = url.pathname
   const method = request.method
 
@@ -1426,3 +1426,5 @@ async function handleCreateReview(request) {
     return errorResponse('Internal server error', 500)
   }
 }
+
+module.exports = handler
