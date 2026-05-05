@@ -378,56 +378,74 @@ function DayTripsModal({ guide, onClose }) {
   )
 }
 
-function PragueContent({ pragueGuides, setSelectedGuide, setShowDayTripsModal, setSelectedTour }) {
+function PragueContent({ pragueGuides, pragueDayTrips, setSelectedGuide, setShowDayTripsModal, setSelectedTour }) {
+  const hasGuides = pragueGuides && pragueGuides.length > 0
+  const hasDayTrips = pragueDayTrips && pragueDayTrips.length > 0
+
   return (
     <div className={styles.pragueContent}>
       <div className={styles.contentHeader}>
         <span className="section-label">Prague</span>
       </div>
-      <div className={styles.sectionTitleWrap}>
-        <h3 className={styles.sectionTitleRow}>Walking tours</h3>
-      </div>
-      <div className={styles.guidesGrid}>
-        {pragueGuides.map((guide) => (
-          <div key={guide.id} className={styles.guideCard}>
-            <img
-              src={guide.photoURL || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=500&fit=crop&crop=face'}
-              alt={guide.name}
-              className={styles.guideImage}
-            />
-            <div className={styles.guideInfo}>
-              <h3 className={styles.guideName}>{guide.name}</h3>
-              <p className={styles.guideExperience}>{guide.experience}</p>
-              <button
-                className={styles.viewItineraryBtn}
-                onClick={() => {
-                  setSelectedGuide(guide)
-                  setShowDayTripsModal(true)
-                }}
-              >
-                View 3-Day Trip
-              </button>
-            </div>
+      {hasGuides && (
+        <>
+          <div className={styles.sectionTitleWrap}>
+            <h3 className={styles.sectionTitleRow}>Walking tours</h3>
           </div>
-        ))}
-      </div>
-      <div className={styles.sectionTitleWrap} style={{ marginTop: '64px' }}>
-        <h3 className={styles.sectionTitleRow}>Day trips</h3>
-      </div>
+          <div className={styles.guidesGrid}>
+            {pragueGuides.map((guide) => (
+              <div key={guide.id} className={styles.guideCard}>
+                <img
+                  src={guide.photoURL || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=500&fit=crop&crop=face'}
+                  alt={guide.name}
+                  className={styles.guideImage}
+                />
+                <div className={styles.guideInfo}>
+                  <h3 className={styles.guideName}>{guide.name}</h3>
+                  <p className={styles.guideExperience}>{guide.experience}</p>
+                  <button
+                    className={styles.viewItineraryBtn}
+                    onClick={() => {
+                      setSelectedGuide(guide)
+                      setShowDayTripsModal(true)
+                    }}
+                  >
+                    View 3-Day Trip
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+      {hasDayTrips && (
+        <div className={styles.sectionTitleWrap} style={{ marginTop: hasGuides ? '64px' : '0' }}>
+          <h3 className={styles.sectionTitleRow}>Day trips</h3>
+        </div>
+      )}
       <div className={styles.toursGrid}>
-        {pragueTours.map((tour) => (
-          <div key={tour.id} className={styles.tourCard} onClick={() => setSelectedTour(toursData.pragueHiking)}>
+        {pragueDayTrips.map((tour) => (
+          <div key={tour.id} className={styles.tourCard} onClick={() => setSelectedTour({
+            id: tour.id,
+            name: tour.title,
+            category: 'Day trips',
+            price: tour.price,
+            duration: tour.duration || 'Full day',
+            departure: tour.city_name || 'From Prague',
+            image: tour.cover_image_url,
+            gallery: tour.cover_image_url ? [tour.cover_image_url] : [],
+          })}>
             <div className={styles.tourImageWrap}>
-              <AutoSlider images={tour.gallery} alt={tour.name} />
-              <span className={styles.tourDeparture}>{tour.departure}</span>
+              <img src={tour.cover_image_url || 'https://images.unsplash.com/photo-1519677100203-a0e668c92439?w=800&q=80'} alt={tour.title} />
+              <span className={styles.tourDeparture}>{tour.city_name || 'From Prague'}</span>
             </div>
             <div className={styles.tourBody}>
-              <h3 className={styles.tourName}>{tour.name}</h3>
+              <h3 className={styles.tourName}>{tour.title}</h3>
               <div className={styles.tourMeta}>
-                <span className={styles.tourDetail}>{tour.duration}</span>
+                <span className={styles.tourDetail}>{tour.duration || 'Full day'}</span>
               </div>
               <div className={styles.tourPrice}>
-                <span className={styles.tourPriceValue}>{tour.price}</span>
+                <span className={styles.tourPriceValue}>€{tour.price}</span>
               </div>
             </div>
           </div>
@@ -538,8 +556,10 @@ export default function HowItWorks() {
   console.log('HowItWorks component rendered')
   const [selectedCity, setSelectedCity] = useState(null)
   const [citiesData, setCitiesData] = useState([])
+  const [citiesLoaded, setCitiesLoaded] = useState(false)
   const [pragueGuides, setPragueGuides] = useState([])
   const [romeGuides, setRomeGuides] = useState([])
+  const [dayTrips, setDayTrips] = useState([])
   const [showDayTripsModal, setShowDayTripsModal] = useState(false)
   const [selectedGuide, setSelectedGuide] = useState(null)
   const [selectedTour, setSelectedTour] = useState(null)
@@ -574,6 +594,7 @@ export default function HowItWorks() {
         const dayTripsResult = await api.getDayTrips()
         if (dayTripsResult.success) {
           console.log('Day trips loaded:', dayTripsResult.data.length)
+          setDayTrips(dayTripsResult.data)
         }
 
         // Fetch week trips for cities
@@ -581,8 +602,12 @@ export default function HowItWorks() {
         if (weekTripsResult.success) {
           console.log('Week trips loaded:', weekTripsResult.data.length)
         }
+
+        // Mark cities as loaded
+        setCitiesLoaded(true)
       } catch (err) {
         console.error('Error fetching data:', err)
+        setCitiesLoaded(true)
       }
     }
     fetchData()
@@ -591,8 +616,9 @@ export default function HowItWorks() {
   // Check if city has active services
   const getCityServices = (cityName) => {
     const city = citiesData.find(c => c.name === cityName)
-    // If city not found in API response, assume it's active by default
-    if (!city) {
+
+    // If API hasn't loaded yet, show all cities as active (loading state)
+    if (!citiesLoaded) {
       return { 
         hasServices: true,
         walk: 0, 
@@ -600,9 +626,21 @@ export default function HowItWorks() {
         week: 0 
       }
     }
+
+    // After API loads, if city not found or has 0 services, return false
+    if (!city) {
+      return { 
+        hasServices: false,
+        walk: 0, 
+        day: 0, 
+        week: 0 
+      }
+    }
+
     const walkCount = parseInt(city.walk_trips_count) || 0
     const dayCount = parseInt(city.day_trips_count) || 0
     const weekCount = parseInt(city.week_trips_count) || 0
+
     return {
       hasServices: walkCount > 0 || dayCount > 0 || weekCount > 0,
       walk: walkCount,
@@ -615,6 +653,9 @@ export default function HowItWorks() {
   const romeServices = getCityServices('Rome')
   const taghazoutServices = getCityServices('Taghazout')
   const dresdenServices = getCityServices('Dresden')
+
+  // Filter Prague day trips from database
+  const pragueDayTrips = dayTrips.filter(trip => trip.city_name === 'Prague')
 
   return (
     <section id="how" className={styles.section}>
@@ -654,6 +695,7 @@ export default function HowItWorks() {
                   {city.name === 'Prague' && pragueServices.hasServices && (
                     <PragueContent
                       pragueGuides={pragueGuides}
+                      pragueDayTrips={pragueDayTrips}
                       setSelectedGuide={setSelectedGuide}
                       setShowDayTripsModal={setShowDayTripsModal}
                       setSelectedTour={setSelectedTour}
@@ -702,6 +744,7 @@ export default function HowItWorks() {
             {selectedCity === 'prague' && pragueServices.hasServices && (
               <PragueContent
                 pragueGuides={pragueGuides}
+                pragueDayTrips={pragueDayTrips}
                 setSelectedGuide={setSelectedGuide}
                 setShowDayTripsModal={setShowDayTripsModal}
                 setSelectedTour={setSelectedTour}
