@@ -8,10 +8,6 @@ import { countries, countryMap, getFlagUrl } from '../data/countries'
 import Footer from '../components/Footer'
 import styles from './Profile.module.css'
 
-// Keep old Firestore import for reference - will be removed after full migration
-// import { collection, query, where, getDocs, doc, getDoc, updateDoc } from 'firebase/firestore'
-// import { db, uploadGuidePhoto } from '../firebase'
-
 function CountrySelector({ selected = [], onChange }) {
   const [search, setSearch] = useState('')
   const [open, setOpen] = useState(false)

@@ -4,19 +4,7 @@ import { loginWithGoogle } from '../firebase'
 import { useAuth } from '../contexts/AuthContext'
 import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react'
 import styles from './Testimonials.module.css'
-
-// Dynamic import to avoid Vite bundling issues
-let apiModule = null
-const loadApi = async () => {
-  if (!apiModule) {
-    apiModule = await import('../lib/api')
-  }
-  return apiModule
-}
-
-// Keep old Firestore import for reference - will be removed after full migration
-// import { collection, addDoc, getDocs, serverTimestamp } from 'firebase/firestore'
-// import { db } from '../firebase'
+import { getReviews } from '../lib/api'
 
 const cityToCountry = {
   rome: { country: 'italy', flag: '🇮🇹' },
@@ -124,12 +112,13 @@ export default function Testimonials() {
   useEffect(() => {
     const fetchTestimonials = async () => {
       try {
-        const snapshot = await getDocs(collection(db, 'testimonials'))
-        const items = snapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(item => item.approved === true || item.approved === undefined)
-        items.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
-        setTestimonials(items)
+        const result = await getReviews()
+        if (result.success) {
+          const items = result.data
+            .filter(item => item.approved === true || item.approved === undefined)
+          items.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
+          setTestimonials(items)
+        }
       } catch (err) {
         console.error('Error fetching testimonials:', err)
       } finally {

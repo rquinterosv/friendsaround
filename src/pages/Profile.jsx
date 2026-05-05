@@ -8,10 +8,6 @@ import { getUser, updateUser, getGuide, getReviews } from '../lib/api'
 import Footer from '../components/Footer'
 import styles from './Profile.module.css'
 
-// Keep old Firestore import for reference - will be removed after full migration
-// import { collection, query, where, getDocs, doc, getDoc, updateDoc, setDoc } from 'firebase/firestore'
-// import { db } from '../firebase'
-
 const cityToCountry = {
   rome: { country: 'italy', flag: '🇮🇹' },
   roma: { country: 'italy', flag: '🇮🇹' },
@@ -342,11 +338,10 @@ export default function Profile() {
     
     const checkGuide = async () => {
       try {
-        const guideQuery = query(collection(db, 'guides'), where('userId', '==', user.uid))
-        const guideSnap = await getDocs(guideQuery)
-        if (!guideSnap.empty && guideSnap.docs[0].data().approved === true) {
+        const result = await getGuide(user.uid)
+        if (result.success && result.data) {
           setIsGuide(true)
-          setGuideData({ id: guideSnap.docs[0].id, ...guideSnap.docs[0].data() })
+          setGuideData(result.data)
         }
       } catch (err) {
         console.error('Error checking guide:', err)

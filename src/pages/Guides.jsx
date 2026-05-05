@@ -6,10 +6,6 @@ import { submitGuideApplication, getCities } from '../lib/api'
 import Footer from '../components/Footer'
 import styles from './Guides.module.css'
 
-// Keep old Firestore import for reference - will be removed after full migration
-// import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
-// import { db } from '../firebase'
-
 const guides = [
   {
     id: 'rafa',
@@ -111,18 +107,20 @@ export default function Guides() {
     setLoading(true)
     setError('')
     try {
-      await addDoc(collection(db, 'guides'), {
+      const result = await submitGuideApplication({
         ...formData,
         userId: user?.uid,
         userEmail: user?.email,
-        approved: false,
-        createdAt: serverTimestamp(),
       })
-      setSubmitted(true)
-      setFormData({ name: '', email: '', country: '', city: '', experience: '' })
+      if (result.success) {
+        setSubmitted(true)
+        setFormData({ name: '', email: '', country: '', city: '', experience: '' })
+      } else {
+        setError(result.error || 'Something went wrong')
+      }
     } catch (err) {
-      console.error('Firestore error:', err)
-      setError(`Something went wrong: ${err?.code || err?.message || 'unknown error'}`)
+      console.error('API error:', err)
+      setError(`Something went wrong: ${err?.message || 'unknown error'}`)
     } finally {
       setLoading(false)
     }

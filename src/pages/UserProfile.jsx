@@ -8,10 +8,6 @@ import { getUser, updateUser, uploadAvatar, getGuide, getReviews } from '../lib/
 import Footer from '../components/Footer'
 import styles from './Profile.module.css'
 
-// Keep old Firestore import for reference - will be removed after full migration
-// import { collection, query, where, getDocs, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
-// import { db, uploadGuidePhoto } from '../firebase'
-
 function CountryBadges({ codes = [] }) {
   if (!codes || codes.length === 0) return null
   return (
