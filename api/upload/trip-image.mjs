@@ -1,6 +1,6 @@
-import cloudinary from '../../lib/cloudinary.js'
-import { query } from '../../lib/db.js'
-import { withAuth, isGuide, successResponse, errorResponse } from '../../lib/_middleware.js'
+import cloudinary from '../../lib/cloudinary.mjs'
+import { query } from '../../lib/db.mjs'
+import { withAuth, isGuide, successResponse, errorResponse } from '../../lib/_middleware.mjs'
 
 export default async function handler(request) {
   if (request.method !== 'POST') {

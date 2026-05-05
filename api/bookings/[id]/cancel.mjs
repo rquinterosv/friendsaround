@@ -1,5 +1,5 @@
-import { query, getClient } from '../../../../../../lib/db.js'
-import { withAuth, successResponse, errorResponse } from '../../../../../../lib/_middleware.js'
+import { query, getClient } from '../../../../../../lib/db.mjs'
+import { withAuth, successResponse, errorResponse } from '../../../../../../lib/_middleware.mjs'
 
 export default async function handler(request, { params }) {
   if (request.method !== 'PATCH') {

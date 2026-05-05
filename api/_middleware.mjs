@@ -1,4 +1,4 @@
-import { verifyToken } from '../lib/firebase-admin.js'
+import { verifyToken } from '../lib/firebase-admin.mjs'
 
 // Helper to verify auth token from request
 export async function withAuth(request) {

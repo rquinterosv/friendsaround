@@ -1,5 +1,5 @@
-import { query } from '../../../../../../lib/db.js'
-import { successResponse, errorResponse } from '../../../../../../lib/_middleware.js'
+import { query } from '../../../../../../lib/db.mjs'
+import { successResponse, errorResponse } from '../../../../../../lib/_middleware.mjs'
 
 export default async function handler(request, { params }) {
   const { id } = params

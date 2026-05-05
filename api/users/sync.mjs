@@ -1,4 +1,4 @@
-import { query } from '../../lib/db.js'
+import { query } from '../../lib/db.mjs'
 
 export default async function handler(request) {
   if (request.method !== 'POST') {

@@ -1,5 +1,5 @@
-import { query } from '../../../../lib/db.js'
-import { successResponse, errorResponse } from '../../../../lib/_middleware.js'
+import { query } from '../../../../lib/db.mjs'
+import { successResponse, errorResponse } from '../../../../lib/_middleware.mjs'
 
 export default async function handler(request) {
   if (request.method !== 'GET') {
@@ -10,22 +10,17 @@ export default async function handler(request) {
     const result = await query(`
       SELECT 
         wt.*,
-        g.id as guide_id,
-        u.full_name as guide_name,
-        u.avatar_url as guide_avatar,
         c.name as city_name,
         c.country
-      FROM walk_trips wt
-      JOIN guides g ON wt.guide_id = g.id
-      JOIN users u ON g.user_id = u.id
+      FROM week_trips wt
       JOIN cities c ON wt.city_id = c.id
-      WHERE wt.active = true AND g.is_active = true
+      WHERE wt.active = true
       ORDER BY wt.title
     `)
 
     return successResponse(result.rows)
   } catch (err) {
-    console.error('Get walk trips error:', err)
+    console.error('Get week trips error:', err)
     return errorResponse('Internal server error', 500)
   }
 }
