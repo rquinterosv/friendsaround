@@ -443,6 +443,9 @@ async function handleUploadTripImage(request) {
 
 async function handleGetCities(request) {
   try {
+    console.log('COCKROACHDB_URL exists:', !!process.env.COCKROACHDB_URL)
+    console.log('COCKROACHDB_URL length:', process.env.COCKROACHDB_URL?.length)
+    
     const result = await query(`
       SELECT 
         c.*,
@@ -1366,6 +1369,9 @@ async function handleCancelBooking(request, id) {
 
 async function handleGetReviews(request) {
   try {
+    console.log('COCKROACHDB_URL exists:', !!process.env.COCKROACHDB_URL)
+    console.log('COCKROACHDB_URL length:', process.env.COCKROACHDB_URL?.length)
+    
     const result = await query(`
       SELECT 
         r.*,
@@ -1379,7 +1385,7 @@ async function handleGetReviews(request) {
 
     return successResponse(result.rows)
   } catch (err) {
-    console.error('Get reviews error:', err)
+    console.error('Get reviews error:', err.message, err.stack)
     return errorResponse('Internal server error', 500)
   }
 }
