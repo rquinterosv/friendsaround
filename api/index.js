@@ -54,8 +54,7 @@ function errorResponse(message, status = 400) {
 
 // Router function
 export default async function handler(request) {
-  const url = new URL(request.url, `http://${request.headers.get('host') || 'localhost'}`)
-  const pathname = url.pathname
+const url = new URL(request.url, `https://${request.headers.host}`)  const pathname = url.pathname
   const method = request.method
 
   // Parse route parameters
