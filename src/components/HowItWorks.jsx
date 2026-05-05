@@ -535,6 +535,7 @@ function DresdenContent({ setSelectedTour }) {
 }
 
 export default function HowItWorks() {
+  console.log('HowItWorks component rendered')
   const [selectedCity, setSelectedCity] = useState(null)
   const [citiesData, setCitiesData] = useState([])
   const [pragueGuides, setPragueGuides] = useState([])
@@ -544,14 +545,20 @@ export default function HowItWorks() {
   const [selectedTour, setSelectedTour] = useState(null)
 
   useEffect(() => {
+    console.log('HowItWorks useEffect fired')
     const fetchData = async () => {
       try {
         const api = await loadApi()
+        console.log('loadApi completed, calling getCities...')
         
         // Fetch cities with service counts
         const citiesResult = await api.getCities()
+        console.log('getCities result:', citiesResult)
         if (citiesResult.success) {
+          console.log('Setting citiesData:', citiesResult.data)
           setCitiesData(citiesResult.data)
+        } else {
+          console.log('getCities was not successful')
         }
 
         // Fetch guides
@@ -584,7 +591,16 @@ export default function HowItWorks() {
   // Check if city has active services
   const getCityServices = (cityName) => {
     const city = citiesData.find(c => c.name === cityName)
-    if (!city) return { hasServices: false, walk: 0, day: 0, week: 0 }
+    // If citiesData is empty (API hasn't loaded yet), assume cities are active
+    if (!city) {
+      console.log(`City ${cityName} not found in citiesData, returning hasServices: ${citiesData.length === 0}`)
+      return { 
+        hasServices: citiesData.length === 0, // fallback: treat as active if API hasn't loaded
+        walk: 0, 
+        day: 0, 
+        week: 0 
+      }
+    }
     const walkCount = parseInt(city.walk_trips_count) || 0
     const dayCount = parseInt(city.day_trips_count) || 0
     const weekCount = parseInt(city.week_trips_count) || 0
