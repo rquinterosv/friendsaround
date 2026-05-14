@@ -52,6 +52,32 @@ function errorResponse(message, status = 400) {
   )
 }
 
+// Normalize incoming request to Web API Request object
+async function normalizeRequest(req) {
+  if (typeof req.json === 'function') return req
+
+  const body = req.method !== 'GET' && req.method !== 'DELETE'
+    ? await new Promise((resolve) => {
+        let data = ''
+        req.on('data', chunk => data += chunk)
+        req.on('end', () => resolve(data || null))
+      })
+    : null
+
+  const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost'
+  const protocol = req.headers['x-forwarded-proto'] || 'https'
+  const url = `${protocol}://${host}${req.url}`
+
+  return new Request(url, {
+    method: req.method,
+    headers: Object.entries(req.headers).reduce((acc, [k, v]) => {
+      acc[k] = Array.isArray(v) ? v.join(', ') : v
+      return acc
+    }, {}),
+    body,
+  })
+}
+
 // Router function
 async function handler(request) {
 const url = new URL(request.url, `https://${request.headers.get('host')}`)
@@ -1429,4 +1455,16 @@ async function handleCreateReview(request) {
   }
 }
 
-module.exports = handler
+module.exports = async (req, res) => {
+  const request = await normalizeRequest(req)
+  const response = await handler(request)
+
+  if (res && typeof res.statusCode !== 'undefined') {
+    res.statusCode = response.status
+    response.headers.forEach((value, key) => res.setHeader(key, value))
+    res.end(await response.text())
+    return
+  }
+
+  return response
+}
