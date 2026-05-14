@@ -207,7 +207,7 @@ export default function GuideProfile() {
       
       if (result.success && result.data) {
         setGuideData(result.data)
-        setIsOwner(!!user && user.uid === result.data.user_id)
+        setIsOwner(!!user && user.uid === result.data.firebase_uid)
       } else {
         setGuideData(null)
       }
@@ -224,9 +224,9 @@ export default function GuideProfile() {
     if (id && !loadAttempted) {
       loadGuideData(id)
     } else if (id && user) {
-      setIsOwner(guideData?.userId === user.uid)
+      setIsOwner(guideData?.firebase_uid === user.uid)
     }
-  }, [id, user, guideData?.userId])
+  }, [id, user, guideData?.firebase_uid])
 
   const handleLogout = async () => {
     try {
@@ -270,15 +270,15 @@ export default function GuideProfile() {
 
 function GuideEditor({ user, guideData, onLogout }) {
   const [guide, setGuide] = useState({
-    name: guideData?.name || user?.displayName || '',
-    experience: guideData?.experience || '',
+    id: guideData?.id || '',
+    name: guideData?.full_name || guideData?.name || user?.displayName || '',
+    experience: guideData?.experience || guideData?.walk_trip_desc || '',
     bio: guideData?.bio || '',
-    photoURL: guideData?.photoURL || user?.photoURL || '',
-    city: guideData?.city || '',
+    photoURL: guideData?.avatar_url || guideData?.photoURL || user?.photoURL || '',
+    city: guideData?.city_name || guideData?.city || '',
     country: guideData?.country || '',
     days: guideData?.days || [],
     visited_countries: guideData?.visited_countries || [],
-    ...guideData,
   })
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -464,7 +464,7 @@ function GuideEditor({ user, guideData, onLogout }) {
               ) : (
                 <>
                   <h3 className={styles.name}>{guide?.name || 'Guide'}</h3>
-                  <p className={styles.email}>{guide?.country}, {guide?.city}</p>
+                  <p className={styles.email}>{[guide?.city, guide?.country].filter(Boolean).join(', ')}</p>
                 </>
               )}
               <span className={styles.guideBadge}>Local Guide</span>
@@ -701,7 +701,13 @@ function CountryBadges({ codes = [] }) {
 }
 
 function GuidePublicProfile({ guide }) {
-  const initial = guide?.name?.charAt(0) || '?'
+  const name = guide?.full_name || guide?.name || 'Guide'
+  const initial = name.charAt(0) || '?'
+  const city = guide?.city_name || guide?.city || ''
+  const country = guide?.country || ''
+  const photoURL = guide?.avatar_url || guide?.photoURL || ''
+  const bio = guide?.bio || ''
+  const location = [city, country].filter(Boolean).join(', ')
   
   return (
     <>
@@ -712,25 +718,27 @@ function GuidePublicProfile({ guide }) {
         <div className={styles.content}>
           <p className="section-label">Local Guide</p>
           <h1 className={styles.headline}>
-            {guide?.name}
+            {name}
           </h1>
-          <p style={{ marginTop: '8px', color: 'var(--muted)' }}>
-            {guide?.city}, {guide?.country}
-          </p>
+          {location && (
+            <p style={{ marginTop: '8px', color: 'var(--muted)' }}>
+              {location}
+            </p>
+          )}
         </div>
       </section>
 
       <section className={styles.profile}>
         <div className={styles.profileInner}>
           <div className={styles.userCard}>
-            {guide?.photoURL ? (
-              <img src={guide.photoURL} alt={guide.name} className={styles.avatar} />
+            {photoURL ? (
+              <img src={photoURL} alt={name} className={styles.avatar} />
             ) : (
               <div className={styles.avatarPlaceholder}>{initial}</div>
             )}
             <div className={styles.userInfo}>
-              <h3 className={styles.name}>{guide?.name}</h3>
-              <p className={styles.email}>{guide?.city}, {guide?.country}</p>
+              <h3 className={styles.name}>{name}</h3>
+              {location && <p className={styles.email}>{location}</p>}
               <CountryBadges codes={guide?.visited_countries} />
               <span className={styles.guideBadge}>Local Guide</span>
             </div>
@@ -738,24 +746,13 @@ function GuidePublicProfile({ guide }) {
         </div>
       </section>
 
-      {guide?.bio && (
+      {bio && (
         <section className={styles.requests}>
           <div className="container">
             <h2 className="section-title" style={{ marginBottom: '16px' }}>
-              About <em>{guide.name?.split(' ')[0]}</em>
+              About <em>{name.split(' ')[0]}</em>
             </h2>
-            <p style={{ lineHeight: 1.7 }}>{guide.bio}</p>
-          </div>
-        </section>
-      )}
-
-      {guide?.experience && (
-        <section className={styles.requests}>
-          <div className="container">
-            <h2 className="section-title" style={{ marginBottom: '16px' }}>
-              Experience
-            </h2>
-            <p style={{ lineHeight: 1.7 }}>{guide.experience}</p>
+            <p style={{ lineHeight: 1.7 }}>{bio}</p>
           </div>
         </section>
       )}

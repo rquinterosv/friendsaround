@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { MapPin, Quote, LogOut, Edit, Save, X, Search, ChevronDown, User, Settings } from 'lucide-react'
 import { countries, countryMap, getFlagUrl } from '../data/countries'
 import { logout } from '../firebase'
-import { getUser, updateUser, getGuide, getReviews } from '../lib/api'
+import { getUser, updateUser, getGuide, getReviews, getMyBookings } from '../lib/api'
 import Footer from '../components/Footer'
 import styles from './Profile.module.css'
 
@@ -197,11 +197,18 @@ export default function Profile() {
       setViewAsUser({ id: targetUserId, displayName: user?.displayName, photoURL: user?.photoURL })
     }
     
-    // Keep requests from Firestore for now - will migrate later
-    setRequests([])
-    
+    // Fetch bookings
     try {
-      const { getReviews } = await import('../lib/api.js')
+      const bookingsResult = await getMyBookings()
+      if (bookingsResult.success) {
+        setRequests(bookingsResult.data)
+      }
+    } catch (err) {
+      console.log('No bookings found')
+      setRequests([])
+    }
+
+    try {
       const reviewResult = await getReviews()
       if (reviewResult.success) {
         const testItems = reviewResult.data
@@ -235,8 +242,6 @@ export default function Profile() {
     }
 
     try {
-      // Check if user is also a guide
-      const { getGuide } = await import('../lib/api.js')
       const guideResult = await getGuide(viewUserId)
       if (guideResult.success && guideResult.data) {
         setIsAlsoGuide(guideResult.data)
@@ -250,7 +255,6 @@ export default function Profile() {
     }
 
     try {
-      const { getReviews } = await import('../lib/api.js')
       const reviewResult = await getReviews()
       if (reviewResult.success) {
         const testItems = reviewResult.data.filter(item => item.user_id === viewUserId)
@@ -296,10 +300,11 @@ export default function Profile() {
     setEditing(true)
   }
 
- const handleSave = async () => {
+  const handleSave = async () => {
     setSaving(true)
     try {
-      const result = await updateUser(user.uid, {
+      const userId = viewAsUser?.id || user?.uid
+      const result = await updateUser(userId, {
         full_name: editData.displayName,
         visited_countries: editData.visited_countries,
       })
@@ -321,7 +326,8 @@ export default function Profile() {
 
   const formatDate = (timestamp) => {
     if (!timestamp) return ''
-    return timestamp.toDate().toLocaleDateString('en-US', {
+    const date = timestamp?.seconds ? new Date(timestamp.seconds * 1000) : new Date(timestamp)
+    return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
@@ -533,7 +539,7 @@ export default function Profile() {
           <div className="container">
             <div className={styles.empty}>
               <p style={{ marginBottom: '16px' }}>This traveler is also a local guide</p>
-              <Link to={`/guide/${isAlsoGuide.userId}`} className="primary" style={{ display: 'inline-flex' }}>
+              <Link to={`/guide/${isAlsoGuide.id}`} className="primary" style={{ display: 'inline-flex' }}>
                 View guide profile →
               </Link>
             </div>
@@ -558,17 +564,21 @@ export default function Profile() {
               {requests.map((req) => (
                 <div key={req.id} className={styles.requestCard}>
                   <div className={styles.requestHeader}>
-                    <span className={styles.destination}>{req.destination}</span>
-                    <span className={styles.package}>{req.package}</span>
+                    <span className={styles.destination}>{req.trip_title}</span>
+                    <span className={styles.package}>{req.trip_type}</span>
                   </div>
                   <div className={styles.requestDetails}>
                     <div className={styles.detail}>
-                      <span className={styles.label}>Dates</span>
-                      <span>{req.arrivalDate} - {req.departureDate}</span>
+                      <span className={styles.label}>Date</span>
+                      <span>{req.booking_date || 'Flexible'}</span>
                     </div>
                     <div className={styles.detail}>
                       <span className={styles.label}>Group</span>
-                      <span>{req.groupSize} people</span>
+                      <span>{req.group_size} people</span>
+                    </div>
+                    <div className={styles.detail}>
+                      <span className={styles.label}>Status</span>
+                      <span>{req.status}</span>
                     </div>
                     <div className={styles.detail}>
                       <span className={styles.label}>Requested</span>
@@ -601,10 +611,7 @@ export default function Profile() {
                   <div className={styles.testimonialHeader}>
                     <span className={styles.destination}>
                       <MapPin size={16} />
-                      {test.trip} {getFlag(test.trip)}
-                    </span>
-                    <span className={`${styles.status} ${test.approved ? styles.approved : styles.pending}`}>
-                      {test.approved ? 'Published' : 'Pending'}
+                      {test.city || test.trip} {getFlag(test.city || test.trip)}
                     </span>
                   </div>
                   {test.photos && test.photos.length > 0 && (
@@ -616,7 +623,7 @@ export default function Profile() {
                   )}
                   <blockquote className={styles.testimonialQuote}>
                     <Quote size={18} className={styles.quoteIcon} />
-                    {test.quote}
+                    {test.content || test.quote}
                   </blockquote>
                   <div className={styles.testimonialDate}>
                     <span>{formatDate(test.createdAt)}</span>

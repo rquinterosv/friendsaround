@@ -267,7 +267,7 @@ async function handleUsersSync(request) {
 async function handleGetUser(request, id) {
   try {
     const result = await query(
-      `SELECT id, full_name, avatar_url, visited_countries, created_at, role FROM users WHERE id = $1`,
+      `SELECT id, full_name, avatar_url, visited_countries, created_at, role FROM users WHERE id = $1 OR firebase_uid = $1`,
       [id]
     )
 
@@ -681,6 +681,7 @@ async function handleGetGuide(request, id) {
     const result = await query(`
       SELECT 
         g.*,
+        u.firebase_uid,
         u.full_name,
         u.avatar_url,
         u.visited_countries,

@@ -164,7 +164,6 @@ export default function UserProfile() {
 
         // Check if user is also a guide
         try {
-          const { getGuide } = await import('../lib/api.js')
           const guideResult = await getGuide(id)
           if (guideResult.success && guideResult.data) {
             setIsAlsoGuide(guideResult.data)
@@ -174,19 +173,20 @@ export default function UserProfile() {
         }
 
         // Fetch reviews by this user
+        let reviewItems = []
         try {
           const reviewResult = await getReviews()
           if (reviewResult.success) {
-            const items = reviewResult.data
+            reviewItems = reviewResult.data
               .filter(item => item.user_id === id)
-            setTestimonials(items)
+            setTestimonials(reviewItems)
             
-            if (!userData && items.length > 0) {
+            if (!userData && reviewItems.length > 0) {
               userData = {
                 id,
-                displayName: items[0].full_name,
-                photoURL: items[0].avatar_url,
-                email: items[0].email,
+                displayName: reviewItems[0].full_name,
+                photoURL: reviewItems[0].avatar_url,
+                email: reviewItems[0].email,
                 type: 'user'
               }
               setUser(userData)
@@ -197,7 +197,7 @@ export default function UserProfile() {
           setTestimonials([])
         }
 
-        if (!userData && testimonials.length === 0) {
+        if (!userData && reviewItems.length === 0) {
           setNotFound(true)
         }
       } catch (err) {
@@ -263,11 +263,10 @@ export default function UserProfile() {
     }
 
     try {
-      const url = await uploadGuidePhoto(id, file)
-      setUser(prev => ({ ...prev, photoURL: url }))
-      
-      const userRef = doc(db, 'users', id)
-      await updateDoc(userRef, { photoURL: url })
+      const result = await uploadAvatar(id, file)
+      if (result.success) {
+        setUser(prev => ({ ...prev, photoURL: result.data.avatar_url }))
+      }
     } catch (err) {
       console.error('Error uploading photo:', err)
       alert(`Error uploading photo: ${err.message}`)
@@ -276,7 +275,8 @@ export default function UserProfile() {
 
   const formatDate = (timestamp) => {
     if (!timestamp) return ''
-    return new Date(timestamp.seconds * 1000).toLocaleDateString('en-US', {
+    const date = timestamp?.seconds ? new Date(timestamp.seconds * 1000) : new Date(timestamp)
+    return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long'
     })
@@ -501,16 +501,13 @@ export default function UserProfile() {
                   <div className={styles.testimonialHeader}>
                     <span className={styles.destination}>
                       <MapPin size={16} />
-                      {test.trip} {test.trip?.split(' → ')[0] && (
+                      {test.city || test.trip} {test.city?.split(' → ')[0] && (
                         <img 
-                          src={getFlagUrl(test.trip?.split(' → ')[0].toLowerCase())} 
+                          src={getFlagUrl(test.city.split(' → ')[0].toLowerCase())} 
                           alt="" 
                           className={styles.tripFlag} 
                         />
                       )}
-                    </span>
-                    <span className={`${styles.status} ${test.approved ? styles.approved : styles.pending}`}>
-                      {test.approved ? 'Published' : 'Pending'}
                     </span>
                   </div>
                   {test.photos && test.photos.length > 0 && (
@@ -522,7 +519,7 @@ export default function UserProfile() {
                   )}
                   <blockquote className={styles.testimonialQuote}>
                     <MessageSquare size={18} className={styles.quoteIcon} />
-                    {test.quote}
+                    {test.content || test.quote}
                   </blockquote>
                   <div className={styles.testimonialDate}>
                     <Calendar size={14} />
