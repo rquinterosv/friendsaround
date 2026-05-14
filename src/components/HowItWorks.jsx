@@ -381,6 +381,7 @@ function DayTripsModal({ guide, onClose }) {
 function PragueContent({ pragueGuides, pragueDayTrips, setSelectedGuide, setShowDayTripsModal, setSelectedTour }) {
   const hasGuides = pragueGuides && pragueGuides.length > 0
   const hasDayTrips = pragueDayTrips && pragueDayTrips.length > 0
+  const tours = hasDayTrips ? pragueDayTrips : pragueTours
 
   return (
     <div className={styles.pragueContent}>
@@ -418,34 +419,34 @@ function PragueContent({ pragueGuides, pragueDayTrips, setSelectedGuide, setShow
           </div>
         </>
       )}
-      {hasDayTrips && (
+      {(!hasDayTrips || tours.length > 0) && (
         <div className={styles.sectionTitleWrap} style={{ marginTop: hasGuides ? '64px' : '0' }}>
           <h3 className={styles.sectionTitleRow}>Day trips</h3>
         </div>
       )}
       <div className={styles.toursGrid}>
-        {pragueDayTrips.map((tour) => (
+        {tours.map((tour) => (
           <div key={tour.id} className={styles.tourCard} onClick={() => setSelectedTour({
             id: tour.id,
-            name: tour.title,
+            name: tour.name || tour.title,
             category: 'Day trips',
             price: tour.price,
             duration: tour.duration || 'Full day',
-            departure: tour.city_name || 'From Prague',
-            image: tour.cover_image_url,
-            gallery: tour.cover_image_url ? [tour.cover_image_url] : [],
+            departure: tour.departure || tour.city_name || 'From Prague',
+            image: tour.image || tour.cover_image_url,
+            gallery: tour.gallery || (tour.cover_image_url ? [tour.cover_image_url] : []),
           })}>
             <div className={styles.tourImageWrap}>
-              <img src={tour.cover_image_url || 'https://images.unsplash.com/photo-1519677100203-a0e668c92439?w=800&q=80'} alt={tour.title} />
-              <span className={styles.tourDeparture}>{tour.city_name || 'From Prague'}</span>
+              <img src={tour.image || tour.cover_image_url || 'https://images.unsplash.com/photo-1519677100203-a0e668c92439?w=800&q=80'} alt={tour.name || tour.title} />
+              <span className={styles.tourDeparture}>{tour.departure || tour.city_name || 'From Prague'}</span>
             </div>
             <div className={styles.tourBody}>
-              <h3 className={styles.tourName}>{tour.title}</h3>
+              <h3 className={styles.tourName}>{tour.name || tour.title}</h3>
               <div className={styles.tourMeta}>
                 <span className={styles.tourDetail}>{tour.duration || 'Full day'}</span>
               </div>
               <div className={styles.tourPrice}>
-                <span className={styles.tourPriceValue}>€{tour.price}</span>
+                <span className={styles.tourPriceValue}>{typeof tour.price === 'string' && tour.price.startsWith('€') ? tour.price : `€${tour.price}`}</span>
               </div>
             </div>
           </div>

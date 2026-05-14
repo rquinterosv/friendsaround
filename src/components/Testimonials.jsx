@@ -4,7 +4,7 @@ import { loginWithGoogle } from '../firebase'
 import { useAuth } from '../contexts/AuthContext'
 import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react'
 import styles from './Testimonials.module.css'
-import { getReviews } from '../lib/api'
+import { getReviews, createReview } from '../lib/api'
 
 const cityToCountry = {
   rome: { country: 'italy', flag: '🇮🇹' },
