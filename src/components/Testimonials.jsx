@@ -114,9 +114,8 @@ export default function Testimonials() {
       try {
         const result = await getReviews()
         if (result.success) {
-          const items = result.data
-            .filter(item => item.approved === true || item.approved === undefined)
-          items.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
+          const items = result.data || []
+          items.sort((a, b) => new Date(b.created_at || b.createdAt) - new Date(a.created_at || a.createdAt))
           setTestimonials(items)
         }
       } catch (err) {
@@ -149,7 +148,7 @@ export default function Testimonials() {
   }
 
   const handleCarouselClick = () => {
-    const userId = testimonials[currentIndex]?.userId
+    const userId = testimonials[currentIndex]?.user_id || testimonials[currentIndex]?.userId
     if (!userId) return
     navigate(`/user/${userId}`)
   }
@@ -222,25 +221,25 @@ export default function Testimonials() {
         {!carouselLoading && testimonials.length > 0 && !submitted && !open && (
           <div 
             className={styles.carousel}
-            onClick={testimonials[currentIndex]?.userId ? handleCarouselClick : undefined}
+            onClick={testimonials[currentIndex]?.user_id || testimonials[currentIndex]?.userId ? handleCarouselClick : undefined}
           >
             <button className={styles.carouselBtn} onClick={prevTestimonial} aria-label="Previous">
               <ChevronLeft size={24} />
             </button>
             <div className={styles.carouselContent}>
               <img 
-                src={testimonials[currentIndex].userPhotoURL || `https://ui-avatars.com/api/?name=${testimonials[currentIndex].name}&background=random`} 
-                alt={testimonials[currentIndex].name}
+                src={testimonials[currentIndex].avatar_url || testimonials[currentIndex].userPhotoURL || `https://ui-avatars.com/api/?name=${testimonials[currentIndex].full_name || testimonials[currentIndex].name}&background=random`} 
+                alt={testimonials[currentIndex].full_name || testimonials[currentIndex].name}
                 className={styles.carouselAvatar}
               />
               <blockquote className={styles.carouselQuote}>
-                {testimonials[currentIndex].quote}
+                {testimonials[currentIndex].content || testimonials[currentIndex].quote}
               </blockquote>
               <div className={styles.carouselMeta}>
-                <cite className={styles.carouselName}>{testimonials[currentIndex].name}</cite>
+                <cite className={styles.carouselName}>{testimonials[currentIndex].full_name || testimonials[currentIndex].name}</cite>
                 <span className={styles.carouselTrip}>
                   <MapPin size={14} />
-                  {testimonials[currentIndex].trip} {getFlag(testimonials[currentIndex].trip)}
+                  {testimonials[currentIndex].city || testimonials[currentIndex].trip} {getFlag(testimonials[currentIndex].city || testimonials[currentIndex].trip)}
                 </span>
               </div>
             </div>
